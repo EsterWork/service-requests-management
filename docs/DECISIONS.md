@@ -95,7 +95,7 @@
 | **SQL Server אמיתי, Database נפרד `ServiceRequests_Tests` (נבחר)** | |
 | EF Core InMemory provider | לא אוכף `rowversion`, לא מריץ SQL אמיתי ולא בודק אינדקסים או `LIKE`. בדיקת Concurrency מולו לא מוכיחה כלום |
 | SQLite | אין `rowversion`; תרגום SQL שונה מ-SQL Server |
-| Testcontainers | הבחירה הטבעית, אבל אין Docker בסביבת הפיתוח |
+| Testcontainers | הבחירה הטבעית, אבל אין Docker בסביבת הפיתוח. ב-CI אותן בדיקות רצות מול SQL Server 2022 בקונטיינר (service container של GitHub Actions), דרך אותו משתנה סביבה, בלי שינוי בקוד |
 
 הבדיקות רצות מול ה-API האמיתי (`WebApplicationFactory`). כל בדיקה מתחילה מ-Database ריק. הן מסרבות לרוץ מול Database ששמו לא מסתיים ב-`_Tests`, כדי שלא ימחקו נתונים אמיתיים. אפשר להפנות אותן ל-SQL Server אחר עם משתנה הסביבה `SERVICE_REQUESTS_TEST_DB`.
 

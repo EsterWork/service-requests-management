@@ -98,7 +98,7 @@
 
 | דרישה | איפה | נבדק |
 |---|---|---|
-| ✅ לפחות 4 בדיקות משמעותיות, לפחות אחת Integration | 49 בדיקות: Backend 19 Unit ו-17 Integration, Frontend 13 | `dotnet test backend/ServiceRequests.sln`, `cd frontend; npm test` |
+| ✅ לפחות 4 בדיקות משמעותיות, לפחות אחת Integration | 49 בדיקות: Backend 19 Unit ו-17 Integration, Frontend 13 | `dotnet test backend/ServiceRequests.sln`, `cd frontend; npm test`; וב-CI על כל push ([ci.yml](../.github/workflows/ci.yml)) |
 | ✅ תרחיש תקין של שליפה, סינון או עדכון | `GetRequests_WithCombinedFilters...`, `UpdateStatus_ValidTransition_...` | |
 | ✅ Validation או קלט לא תקין | `GetRequests_WithInvalidParameters_...`, `UpdateStatus_ForbiddenTransition_...` | |
 | ✅ Concurrency Conflict | `UpdateStatus_TwoConcurrentUpdatesWithSameRowVersion_...` | |
@@ -108,10 +108,10 @@
 
 | דרישה | איפה |
 |---|---|
-| ✅ חלוקה ל-Features ו-Tasks | [WORK_PLAN.md](WORK_PLAN.md): 10 Features, 35 משימות, ו-4 User Stories עם קריטריוני קבלה |
+| ✅ חלוקה ל-Features ו-Tasks | [WORK_PLAN.md](WORK_PLAN.md): 10 Features, 36 משימות, ו-4 User Stories עם קריטריוני קבלה |
 | ✅ מה נדרש ומה התוצר לכל משימה | עמודות "מה נדרש" ו"תוצר" |
 | ✅ סדר ביצוע ותלויות | עמודת "תלויות", דיאגרמה וסעיף "סדר ביצוע" |
-| ✅ הערכת מאמץ | עמודת "שעות", 77 שעות בסך הכול |
+| ✅ הערכת מאמץ | עמודת "שעות", 78.5 שעות בסך הכול |
 | ✅ קשר לדרישות המבדק | עמודת "סעיף במבדק" |
 | ✅ משימות שאינן קוד | תכנון DB (T1.2), בדיקות (F6), ביצועים (F8), תיעוד והיערכות להרצה (F9) |
 
@@ -148,7 +148,7 @@
 | דרישה | איפה |
 |---|---|
 | ⏳ ריפו נגיש לבודקים (לא ZIP) | ריפו ב-GitHub |
-| ✅ אפשר לבחון את המערכת, הקוד, התכנון, המימוש וההחלטות | README עם הוראות שנבדקו, ותיקיית `docs/` |
+| ✅ אפשר לבחון את המערכת, הקוד, התכנון, המימוש וההחלטות | README עם הוראות שנבדקו, תיקיית `docs/`, ו-CI שמריץ את כל הבדיקות ב-GitHub |
 
 ---
 
@@ -174,5 +174,5 @@
 | סינון, מיון או דפדוף של כל הנתונים ב-Client | הכול בצד השרת; ה-Client מקבל עמוד אחד בלבד |
 | Concurrency שמטופל רק ב-UI | נאכף ב-DB (`WHERE RowVersion`) |
 | Cache בלי אסטרטגיית Invalidation | Invalidation אחרי כל עדכון, ו-Expiration כגבול עליון |
-| חלוקת משימות שטחית | 35 משימות עם תלויות, תוצרים והערכות, כולל משימות שאינן קוד; User Stories עם קריטריוני קבלה, Definition of Done וניהול סיכונים |
+| חלוקת משימות שטחית | 36 משימות עם תלויות, תוצרים והערכות, כולל משימות שאינן קוד; User Stories עם קריטריוני קבלה, Definition of Done וניהול סיכונים |
 | Over-Engineering | בלי שכבות שלא נדרשו; כל תוספת נומקה במדידה או בדרישה |

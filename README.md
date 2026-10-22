@@ -1,5 +1,7 @@
 # מערכת לניהול פניות: מבדק Full Stack
 
+[![CI](https://github.com/EsterWork/service-requests-management/actions/workflows/ci.yml/badge.svg)](https://github.com/EsterWork/service-requests-management/actions/workflows/ci.yml)
+
 מערכת לניהול פניות המתקבלות מארגונים ומעסיקים: איתור, סינון, מיון ודפדוף בצד השרת על 100,000 פניות, עדכון סטטוס עם Optimistic Concurrency, היסטוריית שינויים, עדכון Bulk ונתונים מסכמים עם Cache.
 
 | מסמך | תוכן |
@@ -588,6 +590,8 @@ Content-Type: application/json
 dotnet test backend/ServiceRequests.sln   # 19 Unit, 17 Integration
 cd frontend; npm test                     # 13 Frontend
 ```
+
+**CI:** כל push ל-`main` מריץ את כל הבדיקות ב-GitHub Actions ([ci.yml](.github/workflows/ci.yml)): ה-Backend מול SQL Server 2022 בקונטיינר על Linux, וה-Frontend ב-Chrome Headless, כולל Build של Production. התוצאה מוצגת בסימן שבראש הקובץ.
 
 ### Backend
 
