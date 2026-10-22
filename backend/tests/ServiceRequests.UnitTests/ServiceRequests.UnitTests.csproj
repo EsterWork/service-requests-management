@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\ServiceRequests.Domain\ServiceRequests.Domain.csproj" />
     <ProjectReference Include="..\..\src\ServiceRequests.Application\ServiceRequests.Application.csproj" />
+    <ProjectReference Include="..\..\src\ServiceRequests.Infrastructure\ServiceRequests.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

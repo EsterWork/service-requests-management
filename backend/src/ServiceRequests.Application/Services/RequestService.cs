@@ -91,7 +91,9 @@ public class RequestService(IApplicationDbContext dbContext) : IRequestService
         {
             // Prefix search (LIKE 'term%') can seek the Title / OrganizationName indexes; '%term%' would scan the table.
             var search = parameters.Search.Trim();
-            query = query.Where(request => request.Title.StartsWith(search) || request.OrganizationName.StartsWith(search));
+            query = query
+                .Where(request => request.Title.StartsWith(search) || request.OrganizationName.StartsWith(search))
+                .TagWith(QueryTags.Recompile);
         }
 
         return query;
