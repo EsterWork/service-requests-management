@@ -490,4 +490,4 @@ dist/
 
 # Local exam materials (not part of the submission)
 CLAUDE.md
-*.pdf
+/מבחן_FULL_STACK_.pdf
