@@ -219,7 +219,7 @@ cd docs/performance
 │     │    status-update/           דיאלוג עדכון סטטוס וטיפול ב-409
 │     │    request-history-dialog/  היסטוריית שינויים
 │     └─ shared/     תוויות בעברית, טקסטים לדפדוף
-└─ docs/          WORK_PLAN, PERFORMANCE, DECISIONS, performance/ (סקריפט מדידה ותוכניות ביצוע)
+└─ docs/          WORK_PLAN, PERFORMANCE, DECISIONS, CHECKLIST, performance/ (סקריפט מדידה ותוכניות ביצוע)
 ```
 
 **כיוון התלויות:** `Api → Application + Infrastructure`, `Infrastructure → Application → Domain`. ה-Domain לא תלוי באף שכבה.
@@ -587,7 +587,7 @@ dotnet test backend/ServiceRequests.sln
 - Claude (צ'אט): ייעוץ בקבלת החלטות ובבדיקת התוצרים בכל שלב.
 
 **אופן העבודה:**
-- הכנתי קובץ הנחיות מפורט (מבנה הפתרון, עקרונות, סדר שלבים) על בסיס דרישות המבדק.
+- הכנתי, בעזרת Claude (צ'אט), קובץ הנחיות מפורט (מבנה הפתרון, עקרונות, סדר שלבים) על בסיס דרישות המבדק.
 - העבודה נעשתה ב-13 שלבים. בסוף כל שלב קיבלתי סיכום של מה נבנה ואיך נבדק, ואישרתי או ביקשתי שינויים לפני המעבר לשלב הבא.
 - כל שלב נשמר ב-commit נפרד, כך שאפשר לעקוב אחרי התהליך בהיסטוריית ה-Git.
 
