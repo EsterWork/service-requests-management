@@ -103,7 +103,9 @@ dotnet run --project backend/src/ServiceRequests.Api -- seed
 2. מוחקת את כל הפניות וההיסטוריה הקיימות.
 3. מכניסה 100,000 פניות חדשות ב-`SqlBulkCopy`, במנות של 10,000.
 
-בסיום תופיע שורה כמו `Seeding completed: 100000 requests in 17.4s`, והפקודה מסתיימת (היא לא מפעילה את השרת). אפשר להריץ אותה שוב בכל פעם שרוצים לחזור לנתונים נקיים. ההרצה הראשונה עשויה להיות איטית יותר.
+בסיום תופיע שורה כמו `Seeding completed: 100000 requests in 17.4s`, והפקודה מסתיימת (היא לא מפעילה את השרת). אפשר להריץ אותה שוב בכל פעם שרוצים לחזור לנתונים נקיים.
+
+**משך:** במחשב הפיתוח רוב ההרצות לקחו 17 עד 26 שניות, אבל חלקן לקחו כמה דקות (עד כ-5). ההרצה הראשונה עשויה להיות איטית יותר. אם אין שגיאה בחלון, הפקודה עדיין עובדת.
 
 הנתונים דטרמיניסטיים: כל הרצה יוצרת את אותן פניות (Id 1 עד 100,000), עם 250 ארגונים, 48 מטפלים ותאריכים פרוסים על פני השנתיים האחרונות. הנתונים בעברית, כמו ממשק המשתמש.
 
@@ -252,6 +254,8 @@ cd docs/performance
 | `sortBy` | `createdAt`, `updatedAt`, `priority`, `title` | `createdAt` |
 | `sortDirection` | `asc`, `desc` | `desc` |
 
+כל הדוגמאות בסעיף הזה הן בקשות ותשובות אמיתיות, שנלכדו מה-API על נתוני ה-Seed.
+
 ```http
 GET /api/requests?status=InProgress&priority=High&sortBy=createdAt&sortDirection=desc&page=1&pageSize=2
 ```
@@ -260,20 +264,31 @@ GET /api/requests?status=InProgress&priority=High&sortBy=createdAt&sortDirection
 {
   "items": [
     {
-      "id": 173,
-      "title": "שינוי כתובת - אוקטובר 2026",
-      "organizationName": "גליל טכנולוגיות בע\"מ",
+      "id": 65049,
+      "title": "בירור הפקדה לפנסיה - אוקטובר 2026",
+      "organizationName": "שרון מזון בע\"מ",
       "status": "InProgress",
       "priority": "High",
-      "assignedTo": "נועה פרידמן",
-      "createdAt": "2026-10-22T09:01:35.0281923Z",
-      "updatedAt": "2026-10-22T09:15:02.1150000Z",
-      "rowVersion": "AAAAAAAGn1c="
+      "assignedTo": "יוסי לוי",
+      "createdAt": "2026-10-22T11:14:46.9755716Z",
+      "updatedAt": "2026-10-22T11:43:11.265267Z",
+      "rowVersion": "AAAAAAAMNvA="
+    },
+    {
+      "id": 71406,
+      "title": "השגה על חשבונית - אוקטובר 2026",
+      "organizationName": "תמר תקשורת בע\"מ",
+      "status": "InProgress",
+      "priority": "High",
+      "assignedTo": "תמר פרץ",
+      "createdAt": "2026-10-22T09:56:25.6600919Z",
+      "updatedAt": "2026-10-22T10:46:00.918247Z",
+      "rowVersion": "AAAAAAAMT94="
     }
   ],
   "page": 1,
   "pageSize": 2,
-  "totalCount": 5040,
+  "totalCount": 5039,
   "totalPages": 2520
 }
 ```
@@ -290,9 +305,10 @@ GET /api/requests?pageSize=101&sortBy=status
   "title": "One or more validation errors occurred.",
   "status": 400,
   "errors": {
-    "PageSize": ["'Page Size' must be between 1 and 100. You entered 101."],
-    "SortBy": ["'sortBy' must be one of: createdAt, updatedAt, priority, title."]
-  }
+    "SortBy": ["'sortBy' must be one of: createdAt, updatedAt, priority, title."],
+    "PageSize": ["'Page Size' must be between 1 and 100. You entered 101."]
+  },
+  "traceId": "00-462f4f38837d8c33e1951a1093d3e86c-8733a343f85392b8-00"
 }
 ```
 
@@ -302,8 +318,8 @@ GET /api/requests?pageSize=101&sortBy=status
 {
   "byStatus": [
     { "status": "New", "count": 14953 },
-    { "status": "InProgress", "count": 25170 },
-    { "status": "Waiting", "count": 15063 },
+    { "status": "InProgress", "count": 25168 },
+    { "status": "Waiting", "count": 15065 },
     { "status": "Completed", "count": 44814 }
   ],
   "byPriority": [
@@ -317,19 +333,59 @@ GET /api/requests?pageSize=101&sortBy=status
 ### PATCH /api/requests/{id}/status
 
 ```http
-PATCH /api/requests/173/status
+PATCH /api/requests/65049/status
 Content-Type: application/json
 
-{ "newStatus": "Waiting", "rowVersion": "AAAAAAAGn1c=", "changedBy": "דנה כהן" }
+{ "newStatus": "Waiting", "rowVersion": "AAAAAAAMNvA=", "changedBy": "דנה כהן" }
+```
+
+תשובה 200, עם `status`, `updatedAt` ו-`rowVersion` חדשים:
+
+```json
+{
+  "id": 65049,
+  "title": "בירור הפקדה לפנסיה - אוקטובר 2026",
+  "organizationName": "שרון מזון בע\"מ",
+  "status": "Waiting",
+  "priority": "High",
+  "assignedTo": "יוסי לוי",
+  "createdAt": "2026-10-22T11:14:46.9755716Z",
+  "updatedAt": "2026-10-22T13:01:32.7436786Z",
+  "rowVersion": "AAAAAAAMwAQ="
+}
+```
+
+שליחה נוספת עם ה-`rowVersion` **הישן** (`AAAAAAAMNvA=`), אחרי שהפנייה כבר עודכנה, מחזירה 409:
+
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.10",
+  "title": "Conflict",
+  "status": 409,
+  "detail": "Request 65049 was modified by another user. Reload it and try again.",
+  "traceId": "00-5243a64e9936183ccd78de3b69bcf961-e49f15f748cfa0a8-00"
+}
+```
+
+מעבר אסור (פנייה במצב `Completed` ל-`InProgress`) מחזיר 400:
+
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "errors": { "NewStatus": ["Transition from Completed to InProgress is not allowed."] },
+  "traceId": "00-abdb18efec25705b4ba4868a7239a808-c49b758362fedde5-00"
+}
 ```
 
 | מצב | תשובה |
 |---|---|
-| הצלחה | 200 עם הפנייה המעודכנת, כולל `rowVersion` ו-`updatedAt` חדשים |
+| הצלחה | 200 עם הפנייה המעודכנת |
 | שדה חסר / `rowVersion` לא תקין / סטטוס לא קיים | 400 `ValidationProblemDetails` |
-| מעבר אסור (למשל `Completed → InProgress`) | 400, `errors.NewStatus: ["Transition from Completed to InProgress is not allowed."]` |
+| מעבר אסור | 400, השגיאה תחת `errors.NewStatus` |
 | הפנייה לא קיימת | 404 `ProblemDetails` |
-| הפנייה שונתה מאז שהלקוח קרא אותה | 409 `ProblemDetails`: `"Request 173 was modified by another user. Reload it and try again."` |
+| הפנייה שונתה מאז שהלקוח קרא אותה | 409 `ProblemDetails` |
 
 **מעברי הסטטוס המותרים** (מוגדרים במקום אחד: [StatusTransitionValidator.cs](backend/src/ServiceRequests.Domain/StatusTransitionValidator.cs)):
 
@@ -344,14 +400,18 @@ New ──► InProgress ──► Completed (סופי)
 
 ### GET /api/requests/{id}/history
 
+אחרי העדכון שלמעלה ועדכון נוסף בחזרה ל-`InProgress`. ה-409 לא נרשם בהיסטוריה:
+
 ```json
 [
-  { "id": 12, "requestId": 173, "previousStatus": "Waiting", "newStatus": "InProgress", "changedAt": "2026-10-22T10:48:20.9683744Z", "changedBy": "בודקת" },
-  { "id": 11, "requestId": 173, "previousStatus": "InProgress", "newStatus": "Waiting", "changedAt": "2026-10-22T10:48:20.8421868Z", "changedBy": "דנה כהן" }
+  { "id": 25, "requestId": 65049, "previousStatus": "Waiting", "newStatus": "InProgress", "changedAt": "2026-10-22T13:01:32.7760185Z", "changedBy": "יוסי לוי" },
+  { "id": 24, "requestId": 65049, "previousStatus": "InProgress", "newStatus": "Waiting", "changedAt": "2026-10-22T13:01:32.7436786Z", "changedBy": "דנה כהן" }
 ]
 ```
 
 ### PATCH /api/requests/status/bulk
+
+ארבעה פריטים: פנייה תקינה, פנייה שלא קיימת, פנייה עם `rowVersion` ישן, ופנייה במצב `Completed`:
 
 ```http
 PATCH /api/requests/status/bulk
@@ -361,10 +421,10 @@ Content-Type: application/json
   "newStatus": "Waiting",
   "changedBy": "דנה כהן",
   "items": [
-    { "id": 88782, "rowVersion": "AAAAAAAFj1o=" },
+    { "id": 76359, "rowVersion": "AAAAAAAMY0s=" },
     { "id": 999999, "rowVersion": "AAAAAAAAAAE=" },
-    { "id": 12690, "rowVersion": "AAAAAAAAAAE=" },
-    { "id": 85954, "rowVersion": "AAAAAAAGVGc=" }
+    { "id": 44747, "rowVersion": "AAAAAAAAAAE=" },
+    { "id": 85954, "rowVersion": "AAAAAAAMiOs=" }
   ]
 }
 ```
@@ -372,9 +432,9 @@ Content-Type: application/json
 ```json
 {
   "results": [
-    { "id": 88782, "outcome": "Succeeded", "rowVersion": "AAAAAAAGn1g=", "error": null },
+    { "id": 76359, "outcome": "Succeeded", "rowVersion": "AAAAAAAMwAY=", "error": null },
     { "id": 999999, "outcome": "NotFound", "rowVersion": null, "error": "Request 999999 was not found." },
-    { "id": 12690, "outcome": "Conflict", "rowVersion": null, "error": "Request 12690 was modified by another user. Reload it and try again." },
+    { "id": 44747, "outcome": "Conflict", "rowVersion": null, "error": "Request 44747 was modified by another user. Reload it and try again." },
     { "id": 85954, "outcome": "InvalidTransition", "rowVersion": null, "error": "Transition from Completed to Waiting is not allowed." }
   ],
   "summary": { "total": 4, "succeeded": 1, "notFound": 1, "invalidTransition": 1, "conflict": 1 }
