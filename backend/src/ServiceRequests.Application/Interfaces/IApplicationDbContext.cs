@@ -9,6 +9,8 @@ public interface IApplicationDbContext
     DbSet<ServiceRequest> ServiceRequests { get; }
     DbSet<RequestStatusHistory> RequestStatusHistory { get; }
 
+    ChangeTracker ChangeTracker { get; }
+
     EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);

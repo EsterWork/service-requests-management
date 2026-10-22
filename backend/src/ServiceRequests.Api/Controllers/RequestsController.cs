@@ -35,6 +35,17 @@ public class RequestsController(
             : Ok(history);
     }
 
+    /// <summary>
+    /// Partial success: always 200 with a result per item (Succeeded / NotFound / InvalidTransition / Conflict),
+    /// so one conflicting request does not block the others and the client can retry only the failed ones.
+    /// </summary>
+    [HttpPatch("status/bulk")]
+    [ProducesResponseType<BulkUpdateStatusResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<BulkUpdateStatusResult>> BulkUpdateStatus(
+        BulkUpdateStatusRequest request, CancellationToken cancellationToken) =>
+        Ok(await statusService.BulkUpdateStatusAsync(request, cancellationToken));
+
     [HttpPatch("{id:int}/status")]
     [ProducesResponseType<ServiceRequestDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
