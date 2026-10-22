@@ -11,7 +11,10 @@ public class RequestQueryParameters
     public int PageSize { get; set; } = DefaultPageSize;
     public RequestStatus? Status { get; set; }
     public RequestPriority? Priority { get; set; }
+    /// <summary>Prefix match.</summary>
     public string? OrganizationName { get; set; }
+
+    /// <summary>Prefix match.</summary>
     public string? AssignedTo { get; set; }
 
     // DateTimeOffset keeps the client's offset, so "…Z" and "…+03:00" are both converted to UTC correctly.

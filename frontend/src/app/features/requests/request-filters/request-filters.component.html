@@ -1,0 +1,52 @@
+<form class="filters card" [formGroup]="form">
+  <mat-form-field appearance="outline" class="search">
+    <mat-label>חיפוש בכותרת או בשם ארגון</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput formControlName="search" placeholder="תחילת הכותרת או שם הארגון" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>סטטוס</mat-label>
+    <mat-select formControlName="status">
+      <mat-option [value]="null">הכל</mat-option>
+      @for (status of statuses; track status) {
+        <mat-option [value]="status">{{ status | statusLabel }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>עדיפות</mat-label>
+    <mat-select formControlName="priority">
+      <mat-option [value]="null">הכל</mat-option>
+      @for (priority of priorities; track priority) {
+        <mat-option [value]="priority">{{ priority | priorityLabel }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>ארגון</mat-label>
+    <input matInput formControlName="organizationName" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>מטפל</mat-label>
+    <input matInput formControlName="assignedTo" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>נוצרה מתאריך</mat-label>
+    <input matInput type="date" formControlName="createdFrom" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>עד תאריך</mat-label>
+    <input matInput type="date" formControlName="createdTo" />
+  </mat-form-field>
+
+  <button mat-stroked-button type="button" class="clear" (click)="clear()">
+    <mat-icon>filter_alt_off</mat-icon>
+    ניקוי סינון
+  </button>
+</form>

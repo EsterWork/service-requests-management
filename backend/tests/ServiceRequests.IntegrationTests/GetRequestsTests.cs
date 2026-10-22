@@ -19,7 +19,8 @@ public class GetRequestsTests(ApiFactory factory) : IntegrationTestBase(factory)
             TestData.Request(RequestStatus.InProgress, RequestPriority.Low, createdDay: 4),
             TestData.Request(RequestStatus.New, RequestPriority.High, createdDay: 5),
             TestData.Request(RequestStatus.InProgress, RequestPriority.High, organizationName: "Other Organization Ltd", createdDay: 6));
-        const string filter = $"status=InProgress&priority=High&organizationName={TestData.DefaultOrganization}&sortBy=createdAt&sortDirection=desc&pageSize=2";
+        // "Test" is a prefix of the default organization only, so the "Other Organization" request is filtered out.
+        const string filter = "status=InProgress&priority=High&organizationName=Test&sortBy=createdAt&sortDirection=desc&pageSize=2";
 
         var firstPage = await GetPageAsync($"{filter}&page=1");
         var secondPage = await GetPageAsync($"{filter}&page=2");

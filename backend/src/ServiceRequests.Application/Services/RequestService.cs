@@ -62,14 +62,17 @@ public class RequestService(IApplicationDbContext dbContext) : IRequestService
             query = query.Where(request => request.Priority == parameters.Priority);
         }
 
+        // Prefix match, so users can filter by the start of a name; still an index seek like equality.
         if (!string.IsNullOrWhiteSpace(parameters.OrganizationName))
         {
-            query = query.Where(request => request.OrganizationName == parameters.OrganizationName);
+            var organizationName = parameters.OrganizationName.Trim();
+            query = query.Where(request => request.OrganizationName.StartsWith(organizationName));
         }
 
         if (!string.IsNullOrWhiteSpace(parameters.AssignedTo))
         {
-            query = query.Where(request => request.AssignedTo == parameters.AssignedTo);
+            var assignedTo = parameters.AssignedTo.Trim();
+            query = query.Where(request => request.AssignedTo!.StartsWith(assignedTo));
         }
 
         if (parameters.CreatedFrom.HasValue)

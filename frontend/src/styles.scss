@@ -1,0 +1,67 @@
+@use '@angular/material' as mat;
+
+$theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$azure-palette,
+    tertiary: mat.$blue-palette
+  ),
+  typography: (
+    brand-family: 'Heebo, Arial, sans-serif',
+    plain-family: 'Heebo, Arial, sans-serif'
+  ),
+  density: (
+    scale: -2
+  )
+));
+
+@include mat.core();
+
+html {
+  @include mat.all-component-themes($theme);
+}
+
+:root {
+  --page-background: #f5f7fa;
+  --surface: #ffffff;
+  --border: #e2e6ec;
+  --text-muted: #5f6b7a;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--page-background);
+  font-family: Heebo, Arial, sans-serif;
+  color: #1f2933;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* Shared status / priority badges. */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &.status-New { background: #e3f2fd; color: #0d47a1; }
+  &.status-InProgress { background: #fff3e0; color: #9a4d00; }
+  &.status-Waiting { background: #f3e5f5; color: #6a1b9a; }
+  &.status-Completed { background: #e8f5e9; color: #1b5e20; }
+
+  &.priority-Low { background: #eceff1; color: #455a64; }
+  &.priority-Medium { background: #e1f5fe; color: #01579b; }
+  &.priority-High { background: #ffebee; color: #b71c1c; }
+}
