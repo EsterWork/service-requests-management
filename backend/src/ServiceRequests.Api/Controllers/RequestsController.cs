@@ -6,7 +6,7 @@ namespace ServiceRequests.Api.Controllers;
 
 [ApiController]
 [Route("api/requests")]
-public class RequestsController(IRequestService requestService) : ControllerBase
+public class RequestsController(IRequestService requestService, IRequestSummaryService summaryService) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType<PagedResult<ServiceRequestDto>>(StatusCodes.Status200OK)]
@@ -14,4 +14,9 @@ public class RequestsController(IRequestService requestService) : ControllerBase
     public async Task<ActionResult<PagedResult<ServiceRequestDto>>> GetRequests(
         [FromQuery] RequestQueryParameters parameters, CancellationToken cancellationToken) =>
         Ok(await requestService.GetRequestsAsync(parameters, cancellationToken));
+
+    [HttpGet("summary")]
+    [ProducesResponseType<RequestSummaryDto>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<RequestSummaryDto>> GetSummary(CancellationToken cancellationToken) =>
+        Ok(await summaryService.GetSummaryAsync(cancellationToken));
 }
