@@ -65,13 +65,14 @@
 | דרישה | איפה | נבדק |
 |---|---|---|
 | ✅ חיפוש, סינון, מיון ודפדוף בצד השרת | [request-list.component.ts](../frontend/src/app/features/requests/request-list/request-list.component.ts) | בדפדפן: כל שינוי שולח בקשה עם הפרמטרים |
-| ✅ Debounce לחיפוש | `debounceTime(300)` ב-[request-filters.component.ts](../frontend/src/app/features/requests/request-filters/request-filters.component.ts) | 5 הקשות, בקשה אחת |
-| ✅ ביטול או החלפה של בקשות קודמות | `switchMap` ב-`RequestListComponent` | `ERR_ABORTED` לבקשה הקודמת |
-| ✅ Loading, Empty ו-Error | `RequestListComponent`, `RequestSummaryComponent`, `RequestHistoryDialogComponent` | בדפדפן (Empty: חיפוש בלי תוצאות) |
-| ✅ עדכון סטטוס וטיפול ב-409 | [status-update.component.ts](../frontend/src/app/features/requests/status-update/status-update.component.ts) | בדפדפן: עדכון מקביל, הודעה ורענון |
+| ✅ Debounce לחיפוש | 300ms לשדות טקסט ב-[request-filters.component.ts](../frontend/src/app/features/requests/request-filters/request-filters.component.ts) | בדפדפן: 5 הקשות, בקשה אחת; [request-filters.component.spec.ts](../frontend/src/app/features/requests/request-filters/request-filters.component.spec.ts) |
+| ✅ ביטול או החלפה של בקשות קודמות | `switchMap` ב-`RequestListComponent` | בדפדפן: `ERR_ABORTED` לבקשה הקודמת; [request-list.component.spec.ts](../frontend/src/app/features/requests/request-list/request-list.component.spec.ts) |
+| ✅ Loading, Empty ו-Error | `RequestListComponent`, `RequestSummaryComponent`, `RequestHistoryDialogComponent` | בדפדפן; Error ו"נסה שוב" גם ב-`request-list.component.spec.ts` |
+| ✅ עדכון סטטוס וטיפול ב-409 | [status-update.component.ts](../frontend/src/app/features/requests/status-update/status-update.component.ts) | בדפדפן: עדכון מקביל, הודעה ורענון; [status-update.component.spec.ts](../frontend/src/app/features/requests/status-update/status-update.component.spec.ts) |
 | ✅ הצגת Aggregations | [request-summary.component.ts](../frontend/src/app/features/requests/request-summary/request-summary.component.ts) | מתעדכן אחרי עדכון |
 | ✅ צפייה בהיסטוריה | [request-history-dialog.component.ts](../frontend/src/app/features/requests/request-history-dialog/request-history-dialog.component.ts) | בדפדפן |
 | ✅ הפרדה בין Components ל-Services | [requests-api.service.ts](../frontend/src/app/core/services/requests-api.service.ts) הוא היחיד שמשתמש ב-`HttpClient` | |
+| ✅ (מעבר לנדרש) מצב התצוגה ב-URL | [request-query-url.ts](../frontend/src/app/features/requests/request-query-url.ts) | בדפדפן: רענון מחזיר את אותה תצוגה; [request-query-url.spec.ts](../frontend/src/app/features/requests/request-query-url.spec.ts) |
 
 ## 6. ביצועים
 
@@ -97,7 +98,7 @@
 
 | דרישה | איפה | נבדק |
 |---|---|---|
-| ✅ לפחות 4 בדיקות משמעותיות, לפחות אחת Integration | 35 בדיקות: 19 Unit ו-16 Integration | `dotnet test backend/ServiceRequests.sln` |
+| ✅ לפחות 4 בדיקות משמעותיות, לפחות אחת Integration | 49 בדיקות: Backend 19 Unit ו-17 Integration, Frontend 13 | `dotnet test backend/ServiceRequests.sln`, `cd frontend; npm test` |
 | ✅ תרחיש תקין של שליפה, סינון או עדכון | `GetRequests_WithCombinedFilters...`, `UpdateStatus_ValidTransition_...` | |
 | ✅ Validation או קלט לא תקין | `GetRequests_WithInvalidParameters_...`, `UpdateStatus_ForbiddenTransition_...` | |
 | ✅ Concurrency Conflict | `UpdateStatus_TwoConcurrentUpdatesWithSameRowVersion_...` | |
@@ -107,10 +108,10 @@
 
 | דרישה | איפה |
 |---|---|
-| ✅ חלוקה ל-Features ו-Tasks | [WORK_PLAN.md](WORK_PLAN.md): 10 Features ו-33 משימות |
+| ✅ חלוקה ל-Features ו-Tasks | [WORK_PLAN.md](WORK_PLAN.md): 10 Features, 35 משימות, ו-4 User Stories עם קריטריוני קבלה |
 | ✅ מה נדרש ומה התוצר לכל משימה | עמודות "מה נדרש" ו"תוצר" |
 | ✅ סדר ביצוע ותלויות | עמודת "תלויות", דיאגרמה וסעיף "סדר ביצוע" |
-| ✅ הערכת מאמץ | עמודת "שעות", 72 שעות בסך הכול |
+| ✅ הערכת מאמץ | עמודת "שעות", 77 שעות בסך הכול |
 | ✅ קשר לדרישות המבדק | עמודת "סעיף במבדק" |
 | ✅ משימות שאינן קוד | תכנון DB (T1.2), בדיקות (F6), ביצועים (F8), תיעוד והיערכות להרצה (F9) |
 
@@ -157,13 +158,13 @@
 |---|---|---|
 | Backend: .NET / .NET Core | 17 | מבנה ב-4 שכבות, DI ו-Lifetimes, async ו-`CancellationToken`, `GlobalExceptionHandler`, כללי מעבר ב-Domain, Logging (§10 למעלה) |
 | REST API | 13 | 5 Endpoints עם קודי HTTP מדויקים, Pagination, Filtering, Validation ו-Bulk ([README: API](../README.md#api-רשימת-endpoints)) |
-| Angular | 15 | Components נפרדים, `RequestsApiService` יחיד, RxJS (debounce, distinct, switchMap), Server-side, מצבי UI (§5) |
+| Angular | 15 | Components נפרדים, `RequestsApiService` יחיד, RxJS (debounce, distinct, switchMap), Server-side, מצבי UI, מצב ב-URL, 13 בדיקות Frontend (§5) |
 | בסיס נתונים וביצועים | 13 | מודל, אינדקסים, Aggregations ב-DB, מדידות לפני ואחרי, ותיקון שנמצא במדידה ([PERFORMANCE.md](PERFORMANCE.md)) |
 | Concurrency + Audit | 11 | `rowversion` שנאכף ב-DB, 409, Audit באותה טרנזקציה, בדיקה בו-זמנית (§2, §3) |
 | תכנון עבודה וחלוקה למשימות | 8 | [WORK_PLAN.md](WORK_PLAN.md) |
 | איכות קוד וחשיבה מערכתית | 9 | [DECISIONS.md](DECISIONS.md), §10 למעלה |
 | Cache | 4 | בחירה, Expiration, Invalidation ו-Scale-out (§7) |
-| בדיקות אוטומטיות | 6 | 35 בדיקות, כולל Integration מול DB אמיתי ו-Concurrency בו-זמני (§8) |
+| בדיקות אוטומטיות | 6 | 49 בדיקות, כולל Integration מול DB אמיתי, Concurrency בו-זמני ובדיקות Frontend (§8) |
 | תיעוד ואיכות ההגשה | 4 | README, `docs/`, ההחלטות, סעיף AI |
 
 ## דגשים להערכה
@@ -173,5 +174,5 @@
 | סינון, מיון או דפדוף של כל הנתונים ב-Client | הכול בצד השרת; ה-Client מקבל עמוד אחד בלבד |
 | Concurrency שמטופל רק ב-UI | נאכף ב-DB (`WHERE RowVersion`) |
 | Cache בלי אסטרטגיית Invalidation | Invalidation אחרי כל עדכון, ו-Expiration כגבול עליון |
-| חלוקת משימות שטחית | 33 משימות עם תלויות, תוצרים והערכות, כולל משימות שאינן קוד |
+| חלוקת משימות שטחית | 35 משימות עם תלויות, תוצרים והערכות, כולל משימות שאינן קוד; User Stories עם קריטריוני קבלה, Definition of Done וניהול סיכונים |
 | Over-Engineering | בלי שכבות שלא נדרשו; כל תוספת נומקה במדידה או בדרישה |

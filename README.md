@@ -9,6 +9,18 @@
 | [docs/DECISIONS.md](docs/DECISIONS.md) | החלטות טכנולוגיות, חלופות שנשקלו, מגבלות ושיפורים אפשריים |
 | [docs/CHECKLIST.md](docs/CHECKLIST.md) | רשימת בדיקה: איפה מומשה כל דרישה במבדק, ומיפוי לטבלת הניקוד |
 
+## התחלה מהירה
+
+דרוש: .NET 8 SDK, Node.js 18.19+/20.11+/22+, ו-SQL Server מקומי בשם `.\SQLEXPRESS` (למופע אחר ראה [שלב 2](#שלב-2-הגדרת-חיבור-ל-sql-server-רק-אם-צריך)).
+
+```powershell
+dotnet run --project backend/src/ServiceRequests.Api -- seed   # יוצר את ה-DB ו-100,000 פניות
+dotnet run --project backend/src/ServiceRequests.Api           # טרמינל 1: API על http://localhost:5080/swagger
+cd frontend; npm ci; npm start                                 # טרמינל 2: ממשק על http://localhost:4200
+```
+
+בדיקות: `dotnet test backend/ServiceRequests.sln` (Backend), `cd frontend; npm test` (Frontend). הפירוט המלא ב-[הרצה צעד אחר צעד](#הרצה-צעד-אחר-צעד).
+
 ---
 
 ## תוכן עניינים
@@ -53,6 +65,7 @@
 | npm | מגיע עם Node.js | `npm -v` |
 | SQL Server | SQL Server עם הרשאה ליצור Database (המערכת נבדקה על SQL Server 2019 Express) | ראה למטה |
 | Git | כל גרסה | `git --version` |
+| Google Chrome | נדרש רק לבדיקות ה-Frontend (`npm test`) | |
 
 **אין צורך** להתקין את Angular CLI גלובלית: הוא מותקן מקומית עם `npm ci`.
 
@@ -149,6 +162,7 @@ Local:   http://localhost:4200/
 - **חיפוש:** הקלד `גליל` בשדה החיפוש. הבקשה נשלחת רק אחרי שמפסיקים להקליד.
 - **סינון ומיון:** בחר סטטוס או עדיפות, הקלד תחילת שם ארגון או מטפל, בחר טווח תאריכים, ולחץ על כותרת עמודה (כותרת, עדיפות, נוצרה, עודכנה) כדי למיין.
 - **דפדוף:** בתחתית הטבלה, כולל שינוי מספר הפניות בעמוד.
+- **שמירת התצוגה:** אחרי סינון, מיון ומעבר עמוד, הכתובת בדפדפן מתעדכנת. רענון (F5) מציג את אותה תצוגה.
 - **עדכון סטטוס:** כפתור העיפרון בשורה. מוצגים רק המעברים המותרים.
 - **היסטוריה:** כפתור השעון בשורה.
 - **409 Conflict:** פתח את המערכת ב**שני טאבים**. עדכן פנייה בטאב הראשון, ואז, בלי לרענן, נסה לעדכן את אותה פנייה בטאב השני. תוצג הודעה "הפנייה עודכנה על ידי משתמש אחר", והנתונים ירועננו.
@@ -168,7 +182,16 @@ dotnet test backend/ServiceRequests.sln
   שם ה-Database **חייב** להסתיים ב-`_Tests`. הבדיקות מוחקות נתונים, ולכן הן מסרבות לרוץ מול Database אחר.
 - אם ה-API משלב 4 עדיין רץ, ייתכן שה-Build ייכשל כי הקבצים נעולים. עצור אותו (Ctrl+C) לפני הבדיקות.
 
-תוצאה צפויה: `Passed!` בשני פרויקטי הבדיקות (19 Unit ו-16 Integration).
+תוצאה צפויה: `Passed!` בשני פרויקטי הבדיקות (19 Unit ו-17 Integration).
+
+**בדיקות ה-Frontend** (Karma ו-Jasmine, רצות ב-Chrome Headless, ולכן דורשות Google Chrome מותקן):
+
+```powershell
+cd frontend
+npm test
+```
+
+תוצאה צפויה: `TOTAL: 13 SUCCESS`. הבדיקות לא צריכות API או DB, כי בקשות ה-HTTP מדומות (`HttpTestingController`).
 
 ### שלב 7 (אופציונלי): מדידות ביצועים
 
@@ -306,12 +329,14 @@ GET /api/requests?pageSize=101&sortBy=status
   "title": "One or more validation errors occurred.",
   "status": 400,
   "errors": {
-    "SortBy": ["'sortBy' must be one of: createdAt, updatedAt, priority, title."],
-    "PageSize": ["'Page Size' must be between 1 and 100. You entered 101."]
+    "sortBy": ["'sortBy' must be one of: createdAt, updatedAt, priority, title."],
+    "pageSize": ["'Page Size' must be between 1 and 100. You entered 101."]
   },
-  "traceId": "00-462f4f38837d8c33e1951a1093d3e86c-8733a343f85392b8-00"
+  "traceId": "00-47a2f1a4638fe773bcb8d808985a8c3d-6d0105bc0cdc93d8-00"
 }
 ```
+
+שמות השדות בשגיאות הם camelCase, כמו בשאר ה-JSON. בשדות מקוננים נשמר הנתיב, למשל `items[0].rowVersion` ב-Bulk.
 
 ### GET /api/requests/summary
 
@@ -375,8 +400,8 @@ Content-Type: application/json
   "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
   "title": "One or more validation errors occurred.",
   "status": 400,
-  "errors": { "NewStatus": ["Transition from Completed to InProgress is not allowed."] },
-  "traceId": "00-abdb18efec25705b4ba4868a7239a808-c49b758362fedde5-00"
+  "errors": { "newStatus": ["Transition from Completed to InProgress is not allowed."] },
+  "traceId": "00-861663a21204f4d4d19fc443cdbcc372-3121a30876d0b28f-00"
 }
 ```
 
@@ -384,7 +409,7 @@ Content-Type: application/json
 |---|---|
 | הצלחה | 200 עם הפנייה המעודכנת |
 | שדה חסר / `rowVersion` לא תקין / סטטוס לא קיים | 400 `ValidationProblemDetails` |
-| מעבר אסור | 400, השגיאה תחת `errors.NewStatus` |
+| מעבר אסור | 400, השגיאה תחת `errors.newStatus` |
 | הפנייה לא קיימת | 404 `ProblemDetails` |
 | הפנייה שונתה מאז שהלקוח קרא אותה | 409 `ProblemDetails` |
 
@@ -532,7 +557,7 @@ Content-Type: application/json
 
 ## טיפול בשגיאות, Validation ו-Logging
 
-- **Validation:** FluentValidation לכל קלט (פרמטרי השליפה, עדכון בודד, Bulk), דרך Action Filter אחד ([ValidationFilter.cs](backend/src/ServiceRequests.Api/Filters/ValidationFilter.cs)). כל השגיאות מוחזרות כ-400 `ValidationProblemDetails`, באותו פורמט כמו שגיאות Model Binding (למשל `status=Closed`). הודעות JSON לא תקינות לא חושפות שמות טיפוסים פנימיים.
+- **Validation:** FluentValidation לכל קלט (פרמטרי השליפה, עדכון בודד, Bulk), דרך Action Filter אחד ([ValidationFilter.cs](backend/src/ServiceRequests.Api/Filters/ValidationFilter.cs)). כל תשובות ה-400 (שגיאות Model Binding כמו `status=Closed`, שגיאות FluentValidation ומעבר אסור) נבנות במקום אחד ([ValidationProblemResponse.cs](backend/src/ServiceRequests.Api/ErrorHandling/ValidationProblemResponse.cs)), כ-`ValidationProblemDetails` עם שמות שדות ב-camelCase. הודעות JSON לא תקינות לא חושפות שמות טיפוסים פנימיים.
 - **Global Exception Handler** ([GlobalExceptionHandler.cs](backend/src/ServiceRequests.Api/ErrorHandling/GlobalExceptionHandler.cs), `IExceptionHandler`): שגיאה לא צפויה מוחזרת כ-500 `ProblemDetails` בלי פרטים פנימיים. בקשה שהלקוח ביטל (למשל חיפוש ש-`switchMap` החליף) מוחזרת כ-499 ונרשמת כ-Information, לא כשגיאה. ב-.NET 8, ה-Middleware של ASP.NET עדיין רושם שורת `fail` אחת כש-SqlClient מדווח על ביטול כ-`SqlException`; אין דרך לכבות את זה ב-.NET 8.
 - **Logging מובנה** (`ILogger`): עדכון סטטוס (מזהה ומעבר), Conflict (ואיפה נתפס), סיכום Bulk, Invalidation של ה-Cache, Seeding (כמות וזמן). לא נרשמים שמות משתמשים או תוכן הפניות.
 
@@ -545,11 +570,12 @@ Content-Type: application/json
 - **הכול בצד השרת:** כל שינוי בסינון, במיון או בעמוד שולח בקשה חדשה לשרת. ה-Client לא מסנן ולא ממיין.
 - **שרשרת ה-RxJS של החיפוש:**
   ```
-  form.valueChanges ─► debounceTime(300) ─► distinctUntilChanged ─► query ─► switchMap(api.getRequests)
+  שינוי בשדה ─► debounce (300ms לטקסט, 0 לבחירה) ─► distinctUntilChanged ─► query ─► switchMap(api.getRequests)
   ```
-  - `debounceTime(300)`: שולח רק אחרי שהמשתמש הפסיק להקליד ל-300ms (נבדק: 5 הקשות, בקשה אחת).
+  - **debounce:** שדות טקסט (חיפוש, ארגון, מטפל) נשלחים רק אחרי שהמשתמש הפסיק להקליד ל-300ms (נבדק: 5 הקשות, בקשה אחת). בחירה בסטטוס, בעדיפות או בתאריך נשלחת מיד.
   - `distinctUntilChanged`: לא שולח שוב ערך זהה לקודם.
   - `switchMap`: מבטל את הבקשה הקודמת כשמגיעה חדשה, כך שתשובה ישנה ואיטית לא דורסת תוצאות חדשות.
+- **מצב התצוגה ב-URL:** הסינון, המיון והעמוד נשמרים בכתובת (למשל `/?search=גליל&status=Waiting&page=2&sortBy=title&sortDirection=asc`), כך שרענון הדף או שליחת קישור מציגים את אותה תצוגה. ערכים לא תקינים ב-URL מתעלמים מהם ומשתמשים בברירת המחדל ([request-query-url.ts](frontend/src/app/features/requests/request-query-url.ts)).
 - **מצבים:** Loading (spinner בטעינה הראשונה, פס התקדמות בטעינות הבאות), Empty ("לא נמצאו פניות"), Error (הודעה וכפתור "נסה שוב"), גם ב-Summary ובהיסטוריה.
 - **עדכון סטטוס:** הדיאלוג מציג רק את המעברים המותרים. השרת נשאר הסמכות, ודוחה כל מעבר אחר ב-400. ה-409 מטופל כפי שתואר ב-[Concurrency](#concurrency).
 - **ללא ממשק Bulk:** המבחן דורש את ה-Bulk ב-API בלבד.
@@ -559,8 +585,11 @@ Content-Type: application/json
 ## בדיקות אוטומטיות
 
 ```powershell
-dotnet test backend/ServiceRequests.sln
+dotnet test backend/ServiceRequests.sln   # 19 Unit, 17 Integration
+cd frontend; npm test                     # 13 Frontend
 ```
+
+### Backend
 
 | בדיקה | סוג | מה היא מוכיחה |
 |---|---|---|
@@ -572,11 +601,21 @@ dotnet test backend/ServiceRequests.sln
 | `UpdateStatus_ForbiddenTransition_Returns400AndCreatesNoAuditRow` | Integration | מעבר אסור מחזיר 400 בלי Audit |
 | `UpdateStatus_ValidTransition_...`, `UpdateStatus_UnknownRequest_Returns404` | Integration | עדכון תקין (סטטוס, `rowVersion`, `UpdatedAt`, היסטוריה); 404 |
 | `BulkUpdateStatus_MixedItems_ProcessesEachItemIndependently` | Integration | Bulk עם הצלחות, NotFound, Conflict ו-InvalidTransition: כל פריט עובד בנפרד |
+| `BulkUpdateStatus_InvalidRequest_Returns400WithErrorPerField` | Integration | יותר מ-100 פריטים, ו-`rowVersion` לא תקין בפריט (`items[0].rowVersion`) |
 | `Summary_AfterStatusUpdate_ReturnsFreshCountsInsteadOfCachedOnes` | Integration | Invalidation של ה-Cache |
 | `StatusTransitionValidatorTests`, `ServiceRequestTests` | Unit | כללי המעבר ו-`ChangeStatus` (כולל אותו סטטוס ו-Completed סופי) |
 | `RecompileQueryInterceptorTests` | Unit | `OPTION (RECOMPILE)` נוסף רק לשאילתות החיפוש |
 
 בדיקות ה-Integration מריצות את ה-API האמיתי בזיכרון (`WebApplicationFactory`) מול SQL Server אמיתי, ב-Database ייעודי לבדיקות. כל בדיקה מתחילה מ-Database ריק ומכניסה רק את הנתונים שהיא צריכה.
+
+### Frontend
+
+| קובץ | מה הוא מוכיח |
+|---|---|
+| [request-filters.component.spec.ts](frontend/src/app/features/requests/request-filters/request-filters.component.spec.ts) | 4 הקשות מהירות שולחות חיפוש **אחד** רק אחרי 300ms; ערך זהה לא נשלח פעמיים; בחירת סטטוס נשלחת מיד |
+| [request-list.component.spec.ts](frontend/src/app/features/requests/request-list/request-list.component.spec.ts) | `switchMap` מבטל את הבקשה הקודמת ומציג רק את התוצאה האחרונה; סינון, מיון ועמוד משוחזרים מה-URL ונשלחים לשרת; מצב Error ו"נסה שוב" |
+| [status-update.component.spec.ts](frontend/src/app/features/requests/status-update/status-update.component.spec.ts) | רק מעברים מותרים מוצגים; ה-`rowVersion` שהמשתמש ראה נשלח; 409 סוגר את הדיאלוג כ-`conflict` לרענון; 400 משאיר אותו פתוח עם הודעה |
+| [request-query-url.spec.ts](frontend/src/app/features/requests/request-query-url.spec.ts) | המצב שנכתב ל-URL משוחזר בדיוק; ערכים לא תקינים חוזרים לברירת המחדל |
 
 ---
 
