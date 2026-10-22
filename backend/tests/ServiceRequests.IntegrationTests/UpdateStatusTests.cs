@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.Mvc;
 using ServiceRequests.Application.Dtos;
 using ServiceRequests.Domain.Entities;
 using ServiceRequests.Domain.Enums;
@@ -55,6 +56,8 @@ public class UpdateStatusTests(ApiFactory factory) : IntegrationTestBase(factory
         var response = await PatchStatusAsync(request.Id, RequestStatus.InProgress, rowVersion, "alice");
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>(Json);
+        Assert.Contains("newStatus", problem!.Errors.Keys);
         Assert.Empty(await Factory.GetHistoryAsync(request.Id));
         Assert.Equal(RequestStatus.Completed, (await Factory.GetRequestAsync(request.Id)).Status);
     }

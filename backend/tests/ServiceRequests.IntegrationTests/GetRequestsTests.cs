@@ -79,12 +79,12 @@ public class GetRequestsTests(ApiFactory factory) : IntegrationTestBase(factory)
     }
 
     [Theory]
-    [InlineData("pageSize=101", "PageSize")]
-    [InlineData("page=0", "Page")]
-    [InlineData("sortBy=status", "SortBy")]
-    [InlineData("sortDirection=up", "SortDirection")]
-    [InlineData("status=Closed", "Status")]
-    [InlineData("createdFrom=2025-02-01T00:00:00Z&createdTo=2025-01-01T00:00:00Z", "CreatedTo")]
+    [InlineData("pageSize=101", "pageSize")]
+    [InlineData("page=0", "page")]
+    [InlineData("sortBy=status", "sortBy")]
+    [InlineData("sortDirection=up", "sortDirection")]
+    [InlineData("status=Closed", "status")]
+    [InlineData("createdFrom=2025-02-01T00:00:00Z&createdTo=2025-01-01T00:00:00Z", "createdTo")]
     public async Task GetRequests_WithInvalidParameters_Returns400WithFieldError(string query, string expectedErrorField)
     {
         var response = await Client.GetAsync($"{RequestsUrl}?{query}");

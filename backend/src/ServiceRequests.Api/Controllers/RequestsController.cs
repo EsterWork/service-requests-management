@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using ServiceRequests.Api.ErrorHandling;
 using ServiceRequests.Application.Dtos;
 using ServiceRequests.Application.Services;
 
@@ -66,7 +67,7 @@ public class RequestsController(
                 return Problem(statusCode: StatusCodes.Status409Conflict, detail: result.Error);
             case StatusUpdateOutcome.InvalidTransition:
                 ModelState.AddModelError(nameof(request.NewStatus), result.Error!);
-                return ValidationProblem(ModelState);
+                return ValidationProblemResponse.Create(ControllerContext);
             default:
                 throw new UnreachableException($"Unhandled outcome {result.Outcome}.");
         }

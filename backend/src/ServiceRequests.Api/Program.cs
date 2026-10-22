@@ -16,6 +16,7 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services
     .AddControllers(options => options.Filters.Add<ValidationFilter>())
+    .ConfigureApiBehaviorOptions(options => options.InvalidModelStateResponseFactory = ValidationProblemResponse.Create)
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());

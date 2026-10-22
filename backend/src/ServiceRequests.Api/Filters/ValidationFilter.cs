@@ -1,7 +1,6 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+using ServiceRequests.Api.ErrorHandling;
 
 namespace ServiceRequests.Api.Filters;
 
@@ -9,7 +8,7 @@ namespace ServiceRequests.Api.Filters;
 /// Runs the registered FluentValidation validator for every action argument and
 /// returns a 400 ValidationProblemDetails (same format as ASP.NET Core model binding errors).
 /// </summary>
-public class ValidationFilter(ProblemDetailsFactory problemDetailsFactory) : IAsyncActionFilter
+public class ValidationFilter : IAsyncActionFilter
 {
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
@@ -30,8 +29,7 @@ public class ValidationFilter(ProblemDetailsFactory problemDetailsFactory) : IAs
 
         if (!context.ModelState.IsValid)
         {
-            var problemDetails = problemDetailsFactory.CreateValidationProblemDetails(context.HttpContext, context.ModelState);
-            context.Result = new BadRequestObjectResult(problemDetails);
+            context.Result = ValidationProblemResponse.Create(context);
             return;
         }
 

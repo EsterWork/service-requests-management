@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.Mvc;
 using ServiceRequests.Application.Dtos;
 using ServiceRequests.Domain.Enums;
 using ServiceRequests.IntegrationTests.Infrastructure;
@@ -55,5 +56,31 @@ public class BulkUpdateStatusTests(ApiFactory factory) : IntegrationTestBase(fac
         Assert.Single(await Factory.GetHistoryAsync(second.Id));
         Assert.Empty(await Factory.GetHistoryAsync(conflicting.Id));
         Assert.Empty(await Factory.GetHistoryAsync(completed.Id));
+    }
+
+    [Fact]
+    public async Task BulkUpdateStatus_InvalidRequest_Returns400WithErrorPerField()
+    {
+        var tooManyItems = Enumerable.Range(1, BulkUpdateStatusRequest.MaxItems + 1)
+            .Select(id => new BulkUpdateStatusItem { Id = id, RowVersion = TestData.StaleRowVersion })
+            .ToList();
+
+        var tooMany = await PatchBulkAsync(new BulkUpdateStatusRequest { NewStatus = RequestStatus.Waiting, ChangedBy = "alice", Items = tooManyItems });
+        var invalidItem = await PatchBulkAsync(new BulkUpdateStatusRequest
+        {
+            NewStatus = RequestStatus.Waiting,
+            ChangedBy = "alice",
+            Items = [new() { Id = 1, RowVersion = "not-base64" }]
+        });
+
+        Assert.Contains("items", tooMany.Errors.Keys);
+        Assert.Contains("items[0].rowVersion", invalidItem.Errors.Keys);
+    }
+
+    private async Task<ValidationProblemDetails> PatchBulkAsync(BulkUpdateStatusRequest request)
+    {
+        var response = await Client.PatchAsJsonAsync($"{RequestsUrl}/status/bulk", request, Json);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        return (await response.Content.ReadFromJsonAsync<ValidationProblemDetails>(Json))!;
     }
 }
