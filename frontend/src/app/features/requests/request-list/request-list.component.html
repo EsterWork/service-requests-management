@@ -1,6 +1,6 @@
 <app-request-summary />
 
-<app-request-filters (filtersChange)="onFiltersChange($event)" />
+<app-request-filters [initialFilters]="initialFilters" (filtersChange)="onFiltersChange($event)" />
 
 <section class="results card">
   @if (state().error) {

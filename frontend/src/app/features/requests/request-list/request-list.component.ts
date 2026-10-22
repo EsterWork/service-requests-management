@@ -1,6 +1,6 @@
 import { Component, inject, signal, viewChild } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, Location } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,10 +11,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { catchError, map, of, scan, startWith, switchMap } from 'rxjs';
+import { catchError, map, of, scan, startWith, switchMap, tap } from 'rxjs';
 import {
   ALLOWED_TRANSITIONS,
-  DEFAULT_QUERY,
   PagedResult,
   RequestFilters,
   RequestQuery,
@@ -24,6 +23,7 @@ import {
 import { RequestsApiService } from '../../../core/services/requests-api.service';
 import { PriorityLabelPipe, StatusLabelPipe } from '../../../shared/request-labels';
 import { RequestFiltersComponent } from '../request-filters/request-filters.component';
+import { PAGE_SIZE_OPTIONS, readQueryFromUrl, toUrlQueryString } from '../request-query-url';
 import {
   RequestHistoryDialogComponent,
   RequestHistoryDialogData
@@ -77,14 +77,21 @@ export class RequestListComponent {
   private readonly snackBar = inject(MatSnackBar);
   private readonly summary = viewChild.required(RequestSummaryComponent);
 
-  readonly columns = ['title', 'organizationName', 'status', 'priority', 'assignedTo', 'createdAt', 'updatedAt', 'actions'];
-  readonly pageSizeOptions = [10, 20, 50, 100];
+  private readonly location = inject(Location);
 
-  /** Single source of truth for what is shown: filters, sort and page. Every change triggers a server request. */
-  readonly query = signal<RequestQuery>(DEFAULT_QUERY);
+  readonly columns = ['title', 'organizationName', 'status', 'priority', 'assignedTo', 'createdAt', 'updatedAt', 'actions'];
+  readonly pageSizeOptions = PAGE_SIZE_OPTIONS;
+
+  /**
+   * Single source of truth for what is shown: filters, sort and page. Every change triggers a server request.
+   * It starts from the URL and is written back to it, so a refresh or a shared link keeps the same view.
+   */
+  readonly query = signal<RequestQuery>(readQueryFromUrl(this.location.path().split('?')[1] ?? ''));
+  readonly initialFilters: RequestFilters = this.query();
 
   readonly state = toSignal(
     toObservable(this.query).pipe(
+      tap(query => this.location.replaceState(this.location.path().split('?')[0], toUrlQueryString(query))),
       // switchMap cancels the in-flight HTTP request when a newer query arrives,
       // so a slow, outdated response can never overwrite the latest results.
       switchMap(query =>
