@@ -1,0 +1,134 @@
+=== List: status=InProgress & priority=High, newest first (COUNT) | ServiceRequests_NoIndexes
+       1 rows      1 executions  SELECT COUNT(*) FROM [ServiceRequests_NoIndexes] AS [s] WHERE [s].[Status] = @status AND [s].[Priority] = @priority
+       0 rows      0 executions    |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1002],0)))
+       1 rows      1 executions         |--Stream Aggregate(DEFINE:([Expr1002]=Count(*)))
+    5040 rows      1 executions              |--Clustered Index Scan(OBJECT:([ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[PK_ServiceRequests_NoIndexes] AS [s]), WHERE:([ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[Status] as [s].[Status]=[@status] AND [ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[Priority] as [s].[Priority]=[@priority]))
+
+=== List: status=InProgress & priority=High, newest first (COUNT) | ServiceRequests
+       1 rows      1 executions  SELECT COUNT(*) FROM [ServiceRequests] AS [s] WHERE [s].[Status] = @status AND [s].[Priority] = @priority
+       0 rows      0 executions    |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0)))
+       1 rows      1 executions         |--Stream Aggregate(DEFINE:([Expr1004]=Count(*)))
+    5040 rows      1 executions              |--Hash Match(Inner Join, HASH:([s].[Id])=([s].[Id]))
+   19889 rows      1 executions                   |--Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[IX_ServiceRequests_Priority_CreatedAt] AS [s]), SEEK:([s].[Priority]=[@priority]) ORDERED FORWARD)
+   25170 rows      1 executions                   |--Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[IX_ServiceRequests_Status_CreatedAt] AS [s]), SEEK:([s].[Status]=[@status]) ORDERED FORWARD)
+
+=== List: status=InProgress & priority=High, newest first (page 1) | ServiceRequests_NoIndexes
+      20 rows      1 executions  SELECT [s].[Id], [s].[Title], [s].[OrganizationName], [s].[Status], [s].[Priority], [s].[AssignedTo], [s].[CreatedAt], [s].[UpdatedAt], [s].[RowVersion] FROM [ServiceRequests_NoIndexes] AS [s] WHERE [s].[Status] = @status AND [s].[Priority] = @priority ORDER BY [s].[CreatedAt] DESC, [s].[Id] DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY
+      20 rows      1 executions    |--Top(OFFSET EXPRESSION:(CONVERT_IMPLICIT(bigint,[@skip],0)),TOP EXPRESSION:(CONVERT_IMPLICIT(bigint,[@take],0)))
+      20 rows      1 executions         |--Sort(ORDER BY:([s].[CreatedAt] DESC, [s].[Id] DESC))
+    5040 rows      1 executions              |--Clustered Index Scan(OBJECT:([ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[PK_ServiceRequests_NoIndexes] AS [s]), WHERE:([ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[Status] as [s].[Status]=[@status] AND [ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[Priority] as [s].[Priority]=[@priority]))
+
+=== List: status=InProgress & priority=High, newest first (page 1) | ServiceRequests
+      20 rows      1 executions  SELECT [s].[Id], [s].[Title], [s].[OrganizationName], [s].[Status], [s].[Priority], [s].[AssignedTo], [s].[CreatedAt], [s].[UpdatedAt], [s].[RowVersion] FROM [ServiceRequests] AS [s] WHERE [s].[Status] = @status AND [s].[Priority] = @priority ORDER BY [s].[CreatedAt] DESC, [s].[Id] DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY
+      20 rows      1 executions    |--Top(OFFSET EXPRESSION:(CONVERT_IMPLICIT(bigint,[@skip],0)),TOP EXPRESSION:(CONVERT_IMPLICIT(bigint,[@take],0)))
+      20 rows      1 executions         |--Nested Loops(Inner Join, OUTER REFERENCES:([s].[Id], [Expr1003]) WITH ORDERED PREFETCH)
+      50 rows      1 executions              |--Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[IX_ServiceRequests_Priority_CreatedAt] AS [s]), SEEK:([s].[Priority]=[@priority]) ORDERED BACKWARD)
+      20 rows     50 executions              |--Clustered Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[PK_ServiceRequests] AS [s]), SEEK:([s].[Id]=[ServiceRequests].[dbo].[ServiceRequests].[Id] as [s].[Id]),  WHERE:([ServiceRequests].[dbo].[ServiceRequests].[Status] as [s].[Status]=[@status]) LOOKUP ORDERED FORWARD)
+
+=== Search: prefix on Title or OrganizationName (COUNT) | ServiceRequests_NoIndexes
+       1 rows      1 executions  SELECT COUNT(*) FROM [ServiceRequests_NoIndexes] AS [s] WHERE [s].[Title] LIKE @search ESCAPE N'\' OR [s].[OrganizationName] LIKE @search ESCAPE N'\'
+       0 rows      0 executions    |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1010],0)))
+       1 rows      1 executions         |--Stream Aggregate(DEFINE:([Expr1010]=Count(*)))
+    4015 rows      1 executions              |--Clustered Index Scan(OBJECT:([ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[PK_ServiceRequests_NoIndexes] AS [s]), WHERE:([ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[Title] as [s].[Title] like [@search] escape N'\'  OR [ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[OrganizationName] as [s].[OrganizationName] like [@search] escape N'\' ))
+
+=== Search: prefix on Title or OrganizationName (COUNT) | ServiceRequests
+       1 rows      1 executions  SELECT COUNT(*) FROM [ServiceRequests] AS [s] WHERE [s].[Title] LIKE @search ESCAPE N'\' OR [s].[OrganizationName] LIKE @search ESCAPE N'\'
+       0 rows      0 executions    |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1016],0)))
+       1 rows      1 executions         |--Stream Aggregate(DEFINE:([Expr1016]=Count(*)))
+    4015 rows      1 executions              |--Hash Match(Aggregate, HASH:([s].[Id]))
+    4015 rows      1 executions                   |--Concatenation
+       0 rows      1 executions                        |--Nested Loops(Inner Join, OUTER REFERENCES:([Expr1010], [Expr1011], [Expr1012]))
+       0 rows      0 executions                        |    |--Compute Scalar(DEFINE:([Expr1010]=LikeRangeStart([@search],N'\'), [Expr1011]=LikeRangeEnd([@search],N'\'), [Expr1012]=LikeRangeInfo([@search],N'\')))
+       1 rows      1 executions                        |    |    |--Constant Scan
+       0 rows      1 executions                        |    |--Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[IX_ServiceRequests_Title] AS [s]), SEEK:([s].[Title] > [Expr1010] AND [s].[Title] < [Expr1011]),  WHERE:([ServiceRequests].[dbo].[ServiceRequests].[Title] as [s].[Title] like [@search] escape N'\' ) ORDERED FORWARD)
+    4015 rows      1 executions                        |--Nested Loops(Inner Join, OUTER REFERENCES:([Expr1013], [Expr1014], [Expr1015]))
+       0 rows      0 executions                             |--Compute Scalar(DEFINE:([Expr1013]=LikeRangeStart([@search],N'\'), [Expr1014]=LikeRangeEnd([@search],N'\'), [Expr1015]=LikeRangeInfo([@search],N'\')))
+       1 rows      1 executions                             |    |--Constant Scan
+    4015 rows      1 executions                             |--Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[IX_ServiceRequests_OrganizationName] AS [s]), SEEK:([s].[OrganizationName] > [Expr1013] AND [s].[OrganizationName] < [Expr1014]),  WHERE:([ServiceRequests].[dbo].[ServiceRequests].[OrganizationName] as [s].[OrganizationName] like [@search] escape N'\' ) ORDERED FORWARD)
+
+=== Search: prefix on Title or OrganizationName (page 1) | ServiceRequests_NoIndexes
+      20 rows      1 executions  SELECT [s].[Id], [s].[Title], [s].[OrganizationName], [s].[Status], [s].[Priority], [s].[AssignedTo], [s].[CreatedAt], [s].[UpdatedAt], [s].[RowVersion] FROM [ServiceRequests_NoIndexes] AS [s] WHERE [s].[Title] LIKE @search ESCAPE N'\' OR [s].[OrganizationName] LIKE @search ESCAPE N'\' ORDER BY [s].[CreatedAt] DESC, [s].[Id] DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY
+      20 rows      1 executions    |--Top(OFFSET EXPRESSION:(CONVERT_IMPLICIT(bigint,[@skip],0)),TOP EXPRESSION:(CONVERT_IMPLICIT(bigint,[@take],0)))
+      20 rows      1 executions         |--Sort(ORDER BY:([s].[CreatedAt] DESC, [s].[Id] DESC))
+    4015 rows      1 executions              |--Clustered Index Scan(OBJECT:([ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[PK_ServiceRequests_NoIndexes] AS [s]), WHERE:([ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[Title] as [s].[Title] like [@search] escape N'\'  OR [ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[OrganizationName] as [s].[OrganizationName] like [@search] escape N'\' ))
+
+=== Search: prefix on Title or OrganizationName (page 1) | ServiceRequests
+      20 rows      1 executions  SELECT [s].[Id], [s].[Title], [s].[OrganizationName], [s].[Status], [s].[Priority], [s].[AssignedTo], [s].[CreatedAt], [s].[UpdatedAt], [s].[RowVersion] FROM [ServiceRequests] AS [s] WHERE [s].[Title] LIKE @search ESCAPE N'\' OR [s].[OrganizationName] LIKE @search ESCAPE N'\' ORDER BY [s].[CreatedAt] DESC, [s].[Id] DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY
+      20 rows      1 executions    |--Top(OFFSET EXPRESSION:(CONVERT_IMPLICIT(bigint,[@skip],0)),TOP EXPRESSION:(CONVERT_IMPLICIT(bigint,[@take],0)))
+      20 rows      1 executions         |--Nested Loops(Inner Join, OUTER REFERENCES:([s].[Id], [Expr1009]) WITH ORDERED PREFETCH)
+     543 rows      1 executions              |--Index Scan(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[IX_ServiceRequests_CreatedAt] AS [s]), ORDERED BACKWARD)
+      20 rows    543 executions              |--Clustered Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[PK_ServiceRequests] AS [s]), SEEK:([s].[Id]=[ServiceRequests].[dbo].[ServiceRequests].[Id] as [s].[Id]),  WHERE:([ServiceRequests].[dbo].[ServiceRequests].[Title] as [s].[Title] like [@search] escape N'\'  OR [ServiceRequests].[dbo].[ServiceRequests].[OrganizationName] as [s].[OrganizationName] like [@search] escape N'\' ) LOOKUP ORDERED FORWARD)
+
+=== No filter, deep page (page 5000 of 5000) | ServiceRequests_NoIndexes
+      20 rows      1 executions  SELECT [s].[Id], [s].[Title], [s].[OrganizationName], [s].[Status], [s].[Priority], [s].[AssignedTo], [s].[CreatedAt], [s].[UpdatedAt], [s].[RowVersion] FROM [ServiceRequests_NoIndexes] AS [s] ORDER BY [s].[CreatedAt] DESC, [s].[Id] DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY
+      20 rows      1 executions    |--Top(OFFSET EXPRESSION:(CONVERT_IMPLICIT(bigint,[@skip],0)),TOP EXPRESSION:(CONVERT_IMPLICIT(bigint,[@take],0)))
+  100000 rows      1 executions         |--Sort(ORDER BY:([s].[CreatedAt] DESC, [s].[Id] DESC))
+  100000 rows      1 executions              |--Clustered Index Scan(OBJECT:([ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[PK_ServiceRequests_NoIndexes] AS [s]))
+
+=== No filter, deep page (page 5000 of 5000) | ServiceRequests
+      20 rows      1 executions  SELECT [s].[Id], [s].[Title], [s].[OrganizationName], [s].[Status], [s].[Priority], [s].[AssignedTo], [s].[CreatedAt], [s].[UpdatedAt], [s].[RowVersion] FROM [ServiceRequests] AS [s] ORDER BY [s].[CreatedAt] DESC, [s].[Id] DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY
+      20 rows      1 executions    |--Top(OFFSET EXPRESSION:(CONVERT_IMPLICIT(bigint,[@skip],0)),TOP EXPRESSION:(CONVERT_IMPLICIT(bigint,[@take],0)))
+  100000 rows      1 executions         |--Sort(ORDER BY:([s].[CreatedAt] DESC, [s].[Id] DESC))
+  100000 rows      1 executions              |--Clustered Index Scan(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[PK_ServiceRequests] AS [s]))
+
+=== Summary: GROUP BY Status | ServiceRequests_NoIndexes
+       4 rows      1 executions  SELECT [s].[Status], COUNT(*) AS [Count] FROM [ServiceRequests_NoIndexes] AS [s] GROUP BY [s].[Status]
+       0 rows      0 executions    |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0)))
+       4 rows      1 executions         |--Hash Match(Aggregate, HASH:([s].[Status]) DEFINE:([Expr1004]=COUNT(*)))
+  100000 rows      1 executions              |--Clustered Index Scan(OBJECT:([ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[PK_ServiceRequests_NoIndexes] AS [s]))
+
+=== Summary: GROUP BY Status | ServiceRequests
+       4 rows      1 executions  SELECT [s].[Status], COUNT(*) AS [Count] FROM [ServiceRequests] AS [s] GROUP BY [s].[Status]
+       0 rows      0 executions    |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0)))
+       4 rows      1 executions         |--Stream Aggregate(GROUP BY:([s].[Status]) DEFINE:([Expr1004]=Count(*)))
+  100000 rows      1 executions              |--Index Scan(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[IX_ServiceRequests_Status_CreatedAt] AS [s]), ORDERED FORWARD)
+
+=== Summary: GROUP BY Priority | ServiceRequests_NoIndexes
+       3 rows      1 executions  SELECT [s].[Priority], COUNT(*) AS [Count] FROM [ServiceRequests_NoIndexes] AS [s] GROUP BY [s].[Priority]
+       0 rows      0 executions    |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0)))
+       3 rows      1 executions         |--Hash Match(Aggregate, HASH:([s].[Priority]) DEFINE:([Expr1004]=COUNT(*)))
+  100000 rows      1 executions              |--Clustered Index Scan(OBJECT:([ServiceRequests].[dbo].[ServiceRequests_NoIndexes].[PK_ServiceRequests_NoIndexes] AS [s]))
+
+=== Summary: GROUP BY Priority | ServiceRequests
+       3 rows      1 executions  SELECT [s].[Priority], COUNT(*) AS [Count] FROM [ServiceRequests] AS [s] GROUP BY [s].[Priority]
+       0 rows      0 executions    |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0)))
+       3 rows      1 executions         |--Stream Aggregate(GROUP BY:([s].[Priority]) DEFINE:([Expr1004]=Count(*)))
+  100000 rows      1 executions              |--Index Scan(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[IX_ServiceRequests_Priority_CreatedAt] AS [s]), ORDERED FORWARD)
+
+=== Composite index (Status, Priority, CreatedAt): COUNT | ServiceRequests_Composite
+       1 rows      1 executions  SELECT COUNT(*) FROM [ServiceRequests_Composite] AS [s] WHERE [s].[Status] = @status AND [s].[Priority] = @priority
+       0 rows      0 executions    |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1002],0)))
+       1 rows      1 executions         |--Stream Aggregate(DEFINE:([Expr1002]=Count(*)))
+    5040 rows      1 executions              |--Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests_Composite].[IX_Status_Priority_CreatedAt] AS [s]), SEEK:([s].[Status]=[@status] AND [s].[Priority]=[@priority]) ORDERED FORWARD)
+
+=== Composite index (Status, Priority, CreatedAt): page 1 | ServiceRequests_Composite
+      20 rows      1 executions  SELECT [s].[Id], [s].[Title], [s].[OrganizationName], [s].[Status], [s].[Priority], [s].[AssignedTo], [s].[CreatedAt], [s].[UpdatedAt], [s].[RowVersion] FROM [ServiceRequests_Composite] AS [s] WHERE [s].[Status] = @status AND [s].[Priority] = @priority ORDER BY [s].[CreatedAt] DESC, [s].[Id] DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY
+      20 rows      1 executions    |--Top(OFFSET EXPRESSION:(CONVERT_IMPLICIT(bigint,[@skip],0)),TOP EXPRESSION:(CONVERT_IMPLICIT(bigint,[@take],0)))
+      20 rows      1 executions         |--Nested Loops(Inner Join, OUTER REFERENCES:([s].[Id], [Expr1003]) WITH ORDERED PREFETCH)
+      20 rows      1 executions              |--Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests_Composite].[IX_Status_Priority_CreatedAt] AS [s]), SEEK:([s].[Status]=[@status] AND [s].[Priority]=[@priority]) ORDERED BACKWARD)
+      20 rows     20 executions              |--Clustered Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests_Composite].[PK_ServiceRequests_Composite] AS [s]), SEEK:([s].[Id]=[ServiceRequests].[dbo].[ServiceRequests_Composite].[Id] as [s].[Id]) LOOKUP ORDERED FORWARD)
+
+=== Search page 1, prefix with no matches, reused plan | ServiceRequests
+       0 rows      1 executions  SELECT [s].[Id], [s].[Title], [s].[OrganizationName], [s].[Status], [s].[Priority], [s].[AssignedTo], [s].[CreatedAt], [s].[UpdatedAt], [s].[RowVersion] FROM [ServiceRequests] AS [s] WHERE [s].[Title] LIKE @search ESCAPE N'\' OR [s].[OrganizationName] LIKE @search ESCAPE N'\' ORDER BY [s].[CreatedAt] DESC, [s].[Id] DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY
+       0 rows      1 executions    |--Top(OFFSET EXPRESSION:(CONVERT_IMPLICIT(bigint,[@skip],0)),TOP EXPRESSION:(CONVERT_IMPLICIT(bigint,[@take],0)))
+       0 rows      1 executions         |--Nested Loops(Inner Join, OUTER REFERENCES:([s].[Id], [Expr1009]) WITH ORDERED PREFETCH)
+  100000 rows      1 executions              |--Index Scan(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[IX_ServiceRequests_CreatedAt] AS [s]), ORDERED BACKWARD)
+       0 rows 100000 executions              |--Clustered Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[PK_ServiceRequests] AS [s]), SEEK:([s].[Id]=[ServiceRequests].[dbo].[ServiceRequests].[Id] as [s].[Id]),  WHERE:([ServiceRequests].[dbo].[ServiceRequests].[Title] as [s].[Title] like [@search] escape N'\'  OR [ServiceRequests].[dbo].[ServiceRequests].[OrganizationName] as [s].[OrganizationName] like [@search] escape N'\' ) LOOKUP ORDERED FORWARD)
+
+=== Search page 1, prefix with no matches, OPTION (RECOMPILE) | ServiceRequests
+       0 rows      1 executions  SELECT [s].[Id], [s].[Title], [s].[OrganizationName], [s].[Status], [s].[Priority], [s].[AssignedTo], [s].[CreatedAt], [s].[UpdatedAt], [s].[RowVersion] FROM [ServiceRequests] AS [s] WHERE [s].[Title] LIKE @search ESCAPE N'\' OR [s].[OrganizationName] LIKE @search ESCAPE N'\' ORDER BY [s].[CreatedAt] DESC, [s].[Id] DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY OPTION (RECOMPILE)
+       0 rows      1 executions    |--Sort(TOP 20, ORDER BY:([s].[CreatedAt] DESC, [s].[Id] DESC))
+       0 rows      1 executions         |--Nested Loops(Inner Join, OUTER REFERENCES:([s].[Id], [Expr1001]) WITH UNORDERED PREFETCH)
+       0 rows      1 executions              |--Sort(DISTINCT ORDER BY:([s].[Id] ASC))
+       0 rows      1 executions              |    |--Concatenation
+       0 rows      1 executions              |         |--Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[IX_ServiceRequests_Title] AS [s]), SEEK:([s].[Title] >= N'zzz' AND [s].[Title] < N'zzƷ'),  WHERE:([ServiceRequests].[dbo].[ServiceRequests].[Title] as [s].[Title] like N'zzz%' escape N'\' ) ORDERED FORWARD)
+       0 rows      1 executions              |         |--Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[IX_ServiceRequests_OrganizationName] AS [s]), SEEK:([s].[OrganizationName] >= N'zzz' AND [s].[OrganizationName] < N'zzƷ'),  WHERE:([ServiceRequests].[dbo].[ServiceRequests].[OrganizationName] as [s].[OrganizationName] like N'zzz%' escape N'\' ) ORDERED FORWARD)
+       0 rows      0 executions              |--Clustered Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[PK_ServiceRequests] AS [s]), SEEK:([s].[Id]=[ServiceRequests].[dbo].[ServiceRequests].[Id] as [s].[Id]) LOOKUP ORDERED FORWARD)
+
+=== Keyset pagination: same last page as OFFSET 99980 | ServiceRequests
+      20 rows      1 executions  SELECT TOP (@take) [s].[Id], [s].[Title], [s].[OrganizationName], [s].[Status], [s].[Priority], [s].[AssignedTo], [s].[CreatedAt], [s].[UpdatedAt], [s].[RowVersion] FROM [ServiceRequests] AS [s] WHERE [s].[CreatedAt] < @lastCreatedAt OR ([s].[CreatedAt] = @lastCreatedAt AND [s].[Id] < @lastId) ORDER BY [s].[CreatedAt] DESC, [s].[Id] DESC
+      20 rows      1 executions    |--Top(TOP EXPRESSION:(CONVERT_IMPLICIT(bigint,[@take],0)))
+      20 rows      1 executions         |--Nested Loops(Inner Join, OUTER REFERENCES:([s].[Id]))
+      20 rows      1 executions              |--Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[IX_ServiceRequests_CreatedAt] AS [s]), SEEK:([s].[CreatedAt] < [@lastCreatedAt] OR [s].[CreatedAt]=[@lastCreatedAt] AND [s].[Id] < [@lastId]) ORDERED BACKWARD)
+      20 rows     20 executions              |--Clustered Index Seek(OBJECT:([ServiceRequests].[dbo].[ServiceRequests].[PK_ServiceRequests] AS [s]), SEEK:([s].[Id]=[ServiceRequests].[dbo].[ServiceRequests].[Id] as [s].[Id]) LOOKUP ORDERED FORWARD)
+
