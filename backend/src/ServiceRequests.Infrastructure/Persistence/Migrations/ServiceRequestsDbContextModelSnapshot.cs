@@ -102,6 +102,8 @@ namespace ServiceRequests.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("OrganizationName");
 
+                    b.HasIndex("Title");
+
                     b.HasIndex("Priority", "CreatedAt");
 
                     b.HasIndex("Status", "CreatedAt");

@@ -28,5 +28,8 @@ public class ServiceRequestConfiguration : IEntityTypeConfiguration<ServiceReque
         builder.HasIndex(request => request.AssignedTo);
         builder.HasIndex(request => request.OrganizationName);
         builder.HasIndex(request => request.CreatedAt);
+
+        // Supports the prefix search (LIKE 'term%') on Title; OrganizationName is already indexed above.
+        builder.HasIndex(request => request.Title);
     }
 }

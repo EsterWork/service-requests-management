@@ -1,12 +1,22 @@
+using System.Text.Json.Serialization;
+using ServiceRequests.Api.ErrorHandling;
+using ServiceRequests.Api.Filters;
+using ServiceRequests.Application;
 using ServiceRequests.Infrastructure;
 using ServiceRequests.Infrastructure.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("ServiceRequestsDb")
     ?? throw new InvalidOperationException("Connection string 'ServiceRequestsDb' is not configured."));
 
-builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+builder.Services
+    .AddControllers(options => options.Filters.Add<ValidationFilter>())
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -18,6 +28,9 @@ if (args.Contains("seed"))
     await scope.ServiceProvider.GetRequiredService<DatabaseSeeder>().SeedAsync(CancellationToken.None);
     return;
 }
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 if (app.Environment.IsDevelopment())
 {
