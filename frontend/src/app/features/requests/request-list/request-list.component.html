@@ -1,3 +1,5 @@
+<app-request-summary />
+
 <app-request-filters (filtersChange)="onFiltersChange($event)" />
 
 <section class="results card">
@@ -5,7 +7,7 @@
     <div class="state-message error" role="alert">
       <mat-icon>error_outline</mat-icon>
       <p>אירעה שגיאה בטעינת הפניות.</p>
-      <button mat-flat-button (click)="retry()">נסה שוב</button>
+      <button mat-flat-button (click)="reload()">נסה שוב</button>
     </div>
   } @else if (!state().result) {
     <div class="state-message">
@@ -78,6 +80,24 @@
           <ng-container matColumnDef="updatedAt">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>עודכנה</th>
             <td mat-cell *matCellDef="let request" class="date-cell">{{ request.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let request" class="actions-cell">
+              <button
+                mat-icon-button
+                [disabled]="!canUpdateStatus(request)"
+                [matTooltip]="canUpdateStatus(request) ? 'עדכון סטטוס' : 'פנייה שהושלמה אינה ניתנת לעדכון'"
+                aria-label="עדכון סטטוס"
+                (click)="openStatusUpdate(request)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="היסטוריית שינויים" aria-label="היסטוריית שינויים" (click)="openHistory(request)">
+                <mat-icon>history</mat-icon>
+              </button>
+            </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>

@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>עדכון סטטוס</h2>
+
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-dialog-content>
+    <p class="request-title">{{ request.title }}</p>
+    <p class="current">
+      סטטוס נוכחי:
+      <span class="badge status-{{ request.status }}">{{ request.status | statusLabel }}</span>
+    </p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>סטטוס חדש</mat-label>
+      <mat-select formControlName="newStatus">
+        @for (status of nextStatuses; track status) {
+          <mat-option [value]="status">{{ status | statusLabel }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>שם המעדכן</mat-label>
+      <input matInput formControlName="changedBy" maxlength="100" />
+      @if (form.controls.changedBy.hasError('required')) {
+        <mat-error>יש להזין שם</mat-error>
+      }
+    </mat-form-field>
+
+    @if (errorMessage(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close [disabled]="saving()">ביטול</button>
+    <button mat-flat-button type="submit" [disabled]="saving()">
+      {{ saving() ? 'שומר...' : 'שמירה' }}
+    </button>
+  </mat-dialog-actions>
+</form>

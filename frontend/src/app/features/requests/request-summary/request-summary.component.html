@@ -1,0 +1,41 @@
+<section class="summary card" aria-label="סיכום פניות">
+  @if (!state()) {
+    <p class="muted">טוען סיכום...</p>
+  } @else if (state()!.error) {
+    <p class="error" role="alert">
+      לא ניתן לטעון את הסיכום.
+      <button mat-button (click)="refresh()">נסה שוב</button>
+    </p>
+  } @else {
+    @let summary = state()!.summary!;
+
+    <div class="total">
+      <span class="value">{{ total() | number }}</span>
+      <span class="label">סה"כ פניות</span>
+    </div>
+
+    <div class="group">
+      <span class="group-title">לפי סטטוס</span>
+      <div class="items">
+        @for (item of summary.byStatus; track item.status) {
+          <div class="item">
+            <span class="badge status-{{ item.status }}">{{ item.status | statusLabel }}</span>
+            <span class="count">{{ item.count | number }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="group">
+      <span class="group-title">לפי עדיפות</span>
+      <div class="items">
+        @for (item of summary.byPriority; track item.priority) {
+          <div class="item">
+            <span class="badge priority-{{ item.priority }}">{{ item.priority | priorityLabel }}</span>
+            <span class="count">{{ item.count | number }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</section>

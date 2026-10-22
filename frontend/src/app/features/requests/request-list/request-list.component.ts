@@ -1,15 +1,19 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, viewChild } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { catchError, map, of, scan, startWith, switchMap } from 'rxjs';
 import {
+  ALLOWED_TRANSITIONS,
   DEFAULT_QUERY,
   PagedResult,
   RequestFilters,
@@ -20,6 +24,16 @@ import {
 import { RequestsApiService } from '../../../core/services/requests-api.service';
 import { PriorityLabelPipe, StatusLabelPipe } from '../../../shared/request-labels';
 import { RequestFiltersComponent } from '../request-filters/request-filters.component';
+import {
+  RequestHistoryDialogComponent,
+  RequestHistoryDialogData
+} from '../request-history-dialog/request-history-dialog.component';
+import { RequestSummaryComponent } from '../request-summary/request-summary.component';
+import {
+  StatusUpdateComponent,
+  StatusUpdateDialogData,
+  StatusUpdateOutcome
+} from '../status-update/status-update.component';
 
 interface ListState {
   loading: boolean;
@@ -28,6 +42,12 @@ interface ListState {
 }
 
 const INITIAL_STATE: ListState = { loading: true, error: false, result: null };
+
+const STATUS_UPDATE_MESSAGES: Record<StatusUpdateOutcome, string> = {
+  updated: 'הסטטוס עודכן בהצלחה.',
+  conflict: 'הפנייה עודכנה על ידי משתמש אחר. הנתונים רועננו — בדוק את המצב העדכני ונסה שוב.',
+  notFound: 'הפנייה לא נמצאה. הנתונים רועננו.'
+};
 
 @Component({
   selector: 'app-request-list',
@@ -42,17 +62,22 @@ const INITIAL_STATE: ListState = { loading: true, error: false, result: null };
     MatProgressSpinnerModule,
     MatSortModule,
     MatTableModule,
+    MatTooltipModule,
     PriorityLabelPipe,
     StatusLabelPipe,
-    RequestFiltersComponent
+    RequestFiltersComponent,
+    RequestSummaryComponent
   ],
   templateUrl: './request-list.component.html',
   styleUrl: './request-list.component.scss'
 })
 export class RequestListComponent {
   private readonly api = inject(RequestsApiService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly summary = viewChild.required(RequestSummaryComponent);
 
-  readonly columns = ['title', 'organizationName', 'status', 'priority', 'assignedTo', 'createdAt', 'updatedAt'];
+  readonly columns = ['title', 'organizationName', 'status', 'priority', 'assignedTo', 'createdAt', 'updatedAt', 'actions'];
   readonly pageSizeOptions = [10, 20, 50, 100];
 
   /** Single source of truth for what is shown: filters, sort and page. Every change triggers a server request. */
@@ -92,7 +117,34 @@ export class RequestListComponent {
     this.query.update(query => ({ ...query, page: event.pageIndex + 1, pageSize: event.pageSize }));
   }
 
-  retry(): void {
+  /** Re-runs the current query (same filters, sort and page). */
+  reload(): void {
     this.query.update(query => ({ ...query }));
+  }
+
+  canUpdateStatus(request: ServiceRequest): boolean {
+    return ALLOWED_TRANSITIONS[request.status].length > 0;
+  }
+
+  openStatusUpdate(request: ServiceRequest): void {
+    this.dialog
+      .open<StatusUpdateComponent, StatusUpdateDialogData, StatusUpdateOutcome>(StatusUpdateComponent, { data: { request } })
+      .afterClosed()
+      .subscribe(outcome => {
+        if (!outcome) {
+          return;
+        }
+        this.snackBar.open(STATUS_UPDATE_MESSAGES[outcome], 'סגירה', { duration: outcome === 'updated' ? 3000 : 8000 });
+        // After success the row and the summary changed; after a conflict the shown data is outdated.
+        this.reload();
+        this.summary().refresh();
+      });
+  }
+
+  openHistory(request: ServiceRequest): void {
+    this.dialog.open<RequestHistoryDialogComponent, RequestHistoryDialogData>(RequestHistoryDialogComponent, {
+      data: { request },
+      width: '560px'
+    });
   }
 }

@@ -4,6 +4,17 @@ export type RequestPriority = 'Low' | 'Medium' | 'High';
 export const REQUEST_STATUSES: readonly RequestStatus[] = ['New', 'InProgress', 'Waiting', 'Completed'];
 export const REQUEST_PRIORITIES: readonly RequestPriority[] = ['Low', 'Medium', 'High'];
 
+/**
+ * Mirrors the server's StatusTransitionValidator so the UI only offers valid choices.
+ * The server remains the authority and rejects any other transition with 400.
+ */
+export const ALLOWED_TRANSITIONS: Readonly<Record<RequestStatus, readonly RequestStatus[]>> = {
+  New: ['InProgress'],
+  InProgress: ['Waiting', 'Completed'],
+  Waiting: ['InProgress'],
+  Completed: []
+};
+
 export interface ServiceRequest {
   id: number;
   title: string;
@@ -14,6 +25,26 @@ export interface ServiceRequest {
   createdAt: string;
   updatedAt: string;
   rowVersion: string;
+}
+
+export interface UpdateStatusRequest {
+  newStatus: RequestStatus;
+  rowVersion: string;
+  changedBy: string;
+}
+
+export interface RequestStatusHistory {
+  id: number;
+  requestId: number;
+  previousStatus: RequestStatus;
+  newStatus: RequestStatus;
+  changedAt: string;
+  changedBy: string;
+}
+
+export interface RequestSummary {
+  byStatus: { status: RequestStatus; count: number }[];
+  byPriority: { priority: RequestPriority; count: number }[];
 }
 
 export interface PagedResult<T> {

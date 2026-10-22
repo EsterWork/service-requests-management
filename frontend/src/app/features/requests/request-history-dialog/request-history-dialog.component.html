@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>היסטוריית שינויים</h2>
+
+<mat-dialog-content>
+  <p class="request-title">{{ request.title }}</p>
+
+  @if (!state()) {
+    <div class="state-message">
+      <mat-spinner diameter="32" />
+    </div>
+  } @else if (state()!.error) {
+    <p class="state-message error" role="alert">אירעה שגיאה בטעינת ההיסטוריה.</p>
+  } @else if (state()!.history!.length === 0) {
+    <p class="state-message">לא נרשמו שינויי סטטוס לפנייה זו.</p>
+  } @else {
+    <ol class="history">
+      @for (entry of state()!.history; track entry.id) {
+        <li>
+          <div class="transition">
+            <span class="badge status-{{ entry.previousStatus }}">{{ entry.previousStatus | statusLabel }}</span>
+            <mat-icon>arrow_back</mat-icon>
+            <span class="badge status-{{ entry.newStatus }}">{{ entry.newStatus | statusLabel }}</span>
+          </div>
+          <div class="meta">
+            <span>{{ entry.changedBy }}</span>
+            <span class="date">{{ entry.changedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </li>
+      }
+    </ol>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>סגירה</button>
+</mat-dialog-actions>
