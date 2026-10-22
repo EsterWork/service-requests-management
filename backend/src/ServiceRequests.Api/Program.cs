@@ -1,4 +1,9 @@
+using ServiceRequests.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("ServiceRequestsDb")
+    ?? throw new InvalidOperationException("Connection string 'ServiceRequestsDb' is not configured."));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

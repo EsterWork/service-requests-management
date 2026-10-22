@@ -487,3 +487,7 @@ $RECYCLE.BIN/
 node_modules/
 dist/
 .angular/
+
+# Local exam materials (not part of the submission)
+CLAUDE.md
+*.pdf
