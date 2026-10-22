@@ -16,7 +16,12 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services
     .AddControllers(options => options.Filters.Add<ValidationFilter>())
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        // Invalid JSON returns a generic message instead of exposing internal .NET type names.
+        options.AllowInputFormatterExceptionMessages = false;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

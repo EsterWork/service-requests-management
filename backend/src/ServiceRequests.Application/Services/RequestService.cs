@@ -34,6 +34,22 @@ public class RequestService(IApplicationDbContext dbContext) : IRequestService
         return new PagedResult<ServiceRequestDto>(items, parameters.Page, parameters.PageSize, totalCount);
     }
 
+    public async Task<IReadOnlyList<RequestStatusHistoryDto>?> GetHistoryAsync(int requestId, CancellationToken cancellationToken)
+    {
+        if (!await dbContext.ServiceRequests.AnyAsync(request => request.Id == requestId, cancellationToken))
+        {
+            return null;
+        }
+
+        return await dbContext.RequestStatusHistory
+            .AsNoTracking()
+            .Where(history => history.RequestId == requestId)
+            .OrderByDescending(history => history.ChangedAt)
+            .ThenByDescending(history => history.Id)
+            .Select(ServiceRequestMapping.ToHistoryDto)
+            .ToListAsync(cancellationToken);
+    }
+
     private static IQueryable<ServiceRequest> ApplyFilters(IQueryable<ServiceRequest> query, RequestQueryParameters parameters)
     {
         if (parameters.Status.HasValue)

@@ -9,8 +9,10 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddMemoryCache();
+        services.AddSingleton(TimeProvider.System);
         services.AddScoped<IRequestService, RequestService>();
         services.AddScoped<IRequestSummaryService, RequestSummaryService>();
+        services.AddScoped<IRequestStatusService, RequestStatusService>();
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
 
         // API messages are always English, regardless of the server's OS culture.

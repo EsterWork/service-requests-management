@@ -19,4 +19,18 @@ public static class ServiceRequestMapping
         request.CreatedAt,
         request.UpdatedAt,
         Convert.ToBase64String(request.RowVersion));
+
+    private static readonly Func<ServiceRequest, ServiceRequestDto> ToDtoCompiled = ToDto.Compile();
+
+    /// <summary>Maps an entity already in memory (e.g. after an update) using the same definition.</summary>
+    public static ServiceRequestDto ToDtoFromEntity(this ServiceRequest request) => ToDtoCompiled(request);
+
+    public static readonly Expression<Func<RequestStatusHistory, RequestStatusHistoryDto>> ToHistoryDto = history =>
+        new RequestStatusHistoryDto(
+            history.Id,
+            history.RequestId,
+            history.PreviousStatus,
+            history.NewStatus,
+            history.ChangedAt,
+            history.ChangedBy);
 }
