@@ -6,38 +6,40 @@ namespace ServiceRequests.Infrastructure.Seeding;
 
 /// <summary>
 /// Generates realistic, varied service requests. A fixed random seed keeps runs reproducible.
+/// The data is in Hebrew to match the Hebrew user interface.
 /// </summary>
 public class ServiceRequestDataGenerator(DateTime utcNow)
 {
     private const int RandomSeed = 42;
     private static readonly TimeSpan CreationRange = TimeSpan.FromDays(730);
     private static readonly TimeSpan MaxHandlingTime = TimeSpan.FromDays(30);
+    private static readonly CultureInfo HebrewCulture = CultureInfo.GetCultureInfo("he-IL");
 
     private static readonly string[] OrganizationPrefixes =
     [
-        "Northwind", "Galil", "Carmel", "Negev", "Yarden", "Arava", "Hermon", "Tavor", "Sharon", "Kinneret",
-        "Ayalon", "Golan", "Shfela", "Eilat", "Modiin", "Orion", "Atlas", "Delta", "Vertex", "Summit",
-        "Harbor", "Cedar", "Maple", "Silverline", "Bluewave"
+        "גליל", "כרמל", "נגב", "ירדן", "ערבה", "חרמון", "תבור", "שרון", "כנרת", "איילון",
+        "גולן", "שפלה", "אילת", "מודיעין", "אורן", "אלון", "דקל", "ארז", "תמר", "רימון",
+        "שקד", "זית", "גפן", "ברוש", "אשל"
     ];
 
     private static readonly string[] OrganizationTypes =
     [
-        "Logistics", "Technologies", "Industries", "Medical Center", "Foods",
-        "Construction", "Consulting", "Retail", "Insurance", "Education Group"
+        "לוגיסטיקה", "טכנולוגיות", "תעשיות", "מערכות", "מזון",
+        "בנייה", "ייעוץ", "קמעונאות", "ביטוח", "תקשורת"
     ];
 
-    private static readonly string[] FirstNames = ["Dana", "Yossi", "Noa", "Avi", "Maya", "Eitan", "Tamar", "Omer"];
-    private static readonly string[] LastNames = ["Cohen", "Levi", "Mizrahi", "Peretz", "Biton", "Friedman"];
+    private static readonly string[] FirstNames = ["דנה", "יוסי", "נועה", "אבי", "מאיה", "איתן", "תמר", "עומר"];
+    private static readonly string[] LastNames = ["כהן", "לוי", "מזרחי", "פרץ", "ביטון", "פרידמן"];
 
     private static readonly string[] TitleTemplates =
     [
-        "Employer certificate request", "Salary slip correction", "Pension deposit inquiry",
-        "Employee details update", "Severance pay calculation", "Work permit renewal",
-        "Annual report submission", "Tax deduction clarification", "Payment arrangement request",
-        "Address change", "Missing deposit report", "Contract termination notice",
-        "Sick leave balance inquiry", "Training program enrollment", "Bank details update",
-        "Invoice dispute", "Access permissions request", "Overtime payment review",
-        "Maternity leave registration", "Duplicate payment refund"
+        "בקשה לאישור מעסיק", "תיקון תלוש שכר", "בירור הפקדה לפנסיה",
+        "עדכון פרטי עובד", "חישוב פיצויי פיטורים", "חידוש היתר העסקה",
+        "הגשת דוח שנתי", "הבהרה בנושא ניכוי מס", "בקשה להסדר תשלומים",
+        "שינוי כתובת", "דיווח על הפקדה חסרה", "הודעה על סיום העסקה",
+        "בירור יתרת ימי מחלה", "הרשמה לתוכנית הכשרה", "עדכון פרטי חשבון בנק",
+        "השגה על חשבונית", "בקשה להרשאות גישה", "בדיקת תשלום שעות נוספות",
+        "רישום חופשת לידה", "החזר תשלום כפול"
     ];
 
     private static readonly (RequestStatus Value, int Weight)[] StatusWeights =
@@ -51,7 +53,7 @@ public class ServiceRequestDataGenerator(DateTime utcNow)
     ];
 
     private static readonly string[] Organizations =
-        OrganizationPrefixes.SelectMany(prefix => OrganizationTypes.Select(type => $"{prefix} {type} Ltd")).ToArray();
+        OrganizationPrefixes.SelectMany(prefix => OrganizationTypes.Select(type => $"{prefix} {type} בע\"מ")).ToArray();
 
     private static readonly string[] Handlers =
         FirstNames.SelectMany(first => LastNames.Select(last => $"{first} {last}")).ToArray();
@@ -75,7 +77,7 @@ public class ServiceRequestDataGenerator(DateTime utcNow)
         return new ServiceRequest
         {
             Id = id,
-            Title = string.Create(CultureInfo.InvariantCulture, $"{Pick(TitleTemplates)} - {createdAt:MMMM yyyy}"),
+            Title = string.Create(HebrewCulture, $"{Pick(TitleTemplates)} - {createdAt:MMMM yyyy}"),
             OrganizationName = Pick(Organizations),
             Status = status,
             Priority = PickWeighted(PriorityWeights),

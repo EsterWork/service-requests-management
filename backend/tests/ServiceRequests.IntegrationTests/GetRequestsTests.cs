@@ -48,6 +48,24 @@ public class GetRequestsTests(ApiFactory factory) : IntegrationTestBase(factory)
     }
 
     [Fact]
+    public async Task GetRequests_WithHebrewSearch_MatchesTitleOrOrganizationPrefix()
+    {
+        var requests = await Factory.AddRequestsAsync(
+            TestData.Request(title: "תיקון תלוש שכר - יוני 2025", organizationName: "גליל לוגיסטיקה בע\"מ"),
+            TestData.Request(title: "שינוי כתובת - מאי 2025", organizationName: "שכר ופנסיה בע\"מ"),
+            TestData.Request(title: "בירור הפקדה לפנסיה - מרץ 2025", organizationName: "כרמל מזון בע\"מ"));
+
+        var titleMatch = await GetPageAsync($"search={Uri.EscapeDataString("תיקון")}");
+        var organizationMatchOnly = await GetPageAsync($"search={Uri.EscapeDataString("שכר")}");
+        var organizationFilter = await GetPageAsync($"organizationName={Uri.EscapeDataString("כרמל")}");
+
+        Assert.Equal([requests[0].Id], titleMatch.Items.Select(item => item.Id));
+        // "שכר" also appears in the middle of the first title, but the search is prefix-only.
+        Assert.Equal([requests[1].Id], organizationMatchOnly.Items.Select(item => item.Id));
+        Assert.Equal([requests[2].Id], organizationFilter.Items.Select(item => item.Id));
+    }
+
+    [Fact]
     public async Task GetRequests_WithDateRange_ReturnsOnlyRequestsCreatedInRange()
     {
         var requests = await Factory.AddRequestsAsync(

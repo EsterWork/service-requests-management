@@ -16,11 +16,15 @@ public class DatabaseSeeder(ServiceRequestsDbContext dbContext, ILogger<Database
     private const int RequestCount = 100_000;
     private const int BatchSize = 10_000;
 
+    // Deleting and re-inserting the whole data set can exceed the default 30s command timeout on slow machines.
+    private static readonly TimeSpan SeedCommandTimeout = TimeSpan.FromMinutes(5);
+
     public async Task SeedAsync(CancellationToken cancellationToken)
     {
         var stopwatch = Stopwatch.StartNew();
         logger.LogInformation("Seeding started: {RequestCount} requests", RequestCount);
 
+        dbContext.Database.SetCommandTimeout(SeedCommandTimeout);
         await dbContext.Database.MigrateAsync(cancellationToken);
         await ClearDataAsync(cancellationToken);
         await InsertRequestsAsync(cancellationToken);
